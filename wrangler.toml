@@ -1,5 +1,0 @@
-name = "aero-proxy"
-compatibility_date = "2026-11-05"
-
-[pages_build_output_dir]
-directory = "."
