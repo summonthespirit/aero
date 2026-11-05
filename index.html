@@ -1,6 +1,17 @@
 <html>
 <head>
 <script>
+importScripts("https://cdn.jsdelivr.net/gh/summonthespirit/hosting/scramjet.all.js");
+const { ScramjetServiceWorker } = $scramjetLoadWorker();
+const scramjet = new ScramjetServiceWorker()
+async function handleRequest(event) {
+  await scramjet.loadConfig()
+  if (scramjet.route(event)) {return await scramjet.fetch(event)}
+  return await fetch(event.request)
+}
+self.addEventListener('fetch', (event) => {event.respondWith(handleRequest(event))})
+</script>
+<script>
 /*! coi-serviceworker v0.1.7 - Guido Zuidhof and contributors, licensed under MIT */
 let coepCredentialless = false;
 if (typeof window === 'undefined') {
@@ -62,83 +73,7 @@ if (typeof window === 'undefined') {
     });
 
 } else {
-    (() => {
-        const reloadedBySelf = window.sessionStorage.getItem("coiReloadedBySelf");
-        window.sessionStorage.removeItem("coiReloadedBySelf");
-        const coepDegrading = (reloadedBySelf == "coepdegrade");
-
-        const coi = {
-            shouldRegister: () => !reloadedBySelf,
-            shouldDeregister: () => false,
-            coepCredentialless: () => true,
-            coepDegrade: () => true,
-            doReload: () => window.location.reload(),
-            quiet: false,
-            ...window.coi
-        };
-
-        const n = navigator;
-        const controlling = n.serviceWorker && n.serviceWorker.controller;
-
-        if (controlling && !window.crossOriginIsolated) {
-            window.sessionStorage.setItem("coiCoepHasFailed", "true");
-        }
-        const coepHasFailed = window.sessionStorage.getItem("coiCoepHasFailed");
-
-        if (controlling) {
-            const reloadToDegrade = coi.coepDegrade() && !(
-                coepDegrading || window.crossOriginIsolated
-            );
-            n.serviceWorker.controller.postMessage({
-                type: "coepCredentialless",
-                value: (reloadToDegrade || coepHasFailed && coi.coepDegrade())
-                    ? false
-                    : coi.coepCredentialless(),
-            });
-            if (reloadToDegrade) {
-                !coi.quiet && console.log("Reloading page to degrade COEP.");
-                window.sessionStorage.setItem("coiReloadedBySelf", "coepdegrade");
-                coi.doReload("coepdegrade");
-            }
-
-            if (coi.shouldDeregister()) {
-                n.serviceWorker.controller.postMessage({ type: "deregister" });
-            }
-        }
-
-        if (window.crossOriginIsolated !== false || !coi.shouldRegister()) return;
-
-        if (!window.isSecureContext) {
-            !coi.quiet && console.log("COOP/COEP Service Worker not registered, a secure context is required.");
-            return;
-        }
-
-        if (!n.serviceWorker) {
-            !coi.quiet && console.error("COOP/COEP Service Worker not registered, perhaps due to private mode.");
-            return;
-        }
-
-        n.serviceWorker.register(window.document.currentScript.src).then(
-            (registration) => {
-                !coi.quiet && console.log("COOP/COEP Service Worker registered", registration.scope);
-
-                registration.addEventListener("updatefound", () => {
-                    !coi.quiet && console.log("Reloading page to make use of updated COOP/COEP Service Worker.");
-                    window.sessionStorage.setItem("coiReloadedBySelf", "updatefound");
-                    coi.doReload();
-                });
-
-                if (registration.active && !n.serviceWorker.controller) {
-                    !coi.quiet && console.log("Reloading page to make use of COOP/COEP Service Worker.");
-                    window.sessionStorage.setItem("coiReloadedBySelf", "notcontrolling");
-                    coi.doReload();
-                }
-            },
-            (err) => {
-                !coi.quiet && console.error("COOP/COEP Service Worker failed to register:", err);
-            }
-        );
-    })();
+    // Disabled self-script registration to prevent text/html MIME type errors.
 }
 </script>
   <title>Google</title>
@@ -387,13 +322,7 @@ if (typeof window === 'undefined') {
     async function initScramjet() {
       try {
         if ("serviceWorker" in navigator) {
-          // Fetch the remote sw.js content and register it dynamically as a blob URL on the same origin
-          const response = await fetch("https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/sw.js");
-          const swCode = await response.text();
-          const blob = new Blob([swCode], { type: "application/javascript" });
-          const blobUrl = URL.createObjectURL(blob);
-
-          await navigator.serviceWorker.register(blobUrl, {
+          await navigator.serviceWorker.register("./sw.js", {
             scope: "/"
           });
         }
@@ -418,6 +347,11 @@ if (typeof window === 'undefined') {
     const iframe = document.getElementById("iframe");
     const titleDiv = document.querySelector(".title");
     const searchForm = document.getElementById("search");
+    const bgVideo = document.getElementById("background-video");
+
+    bgVideo.play().catch(() => {
+      window.addEventListener('click', () => { bgVideo.play(); }, { once: true });
+    });
 
     gear.onclick = () => { overlay.classList.toggle("active"); settings.classList.toggle("open"); }
     overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove("active"); settings.classList.remove("open"); } }
