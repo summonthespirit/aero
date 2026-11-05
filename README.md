@@ -2,7 +2,6 @@
 aero is a proxy website i update in my free time.
 
 # features
-~~COMPLETELY~~ ~~singlefile~~! it requires only two files to run.
 static!!!! you can rehost this website **everywhere**!!!!
 
 i dont know what else to write!!!!

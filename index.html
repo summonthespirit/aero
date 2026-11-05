@@ -371,7 +371,7 @@ if (typeof window === 'undefined') {
   </div>
   <iframe id="iframe"></iframe>
 
-  <script src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.all.js" defer></script>
+  <script src="./scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
     import * as BareMux from "https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@latest/dist/index.mjs";
 
@@ -379,9 +379,9 @@ if (typeof window === 'undefined') {
     const scramjet = new ScramjetController({ 
       prefix: "/scramjet/", 
       files: { 
-        wasm: "https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/wasm.wasm", 
-        all: "https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.all.js", 
-        sync: "https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.sync.js" 
+        wasm: "./scramjet/wasm.wasm", 
+        all: "./scramjet/scramjet.all.js", 
+        sync: "./scramjet/scramjet.sync.js" 
       } 
     });
 
