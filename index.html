@@ -1,81 +1,5 @@
 <html>
 <head>
-<script>
-importScripts("https://cdn.jsdelivr.net/gh/summonthespirit/hosting/scramjet.all.js");
-const { ScramjetServiceWorker } = $scramjetLoadWorker();
-const scramjet = new ScramjetServiceWorker()
-async function handleRequest(event) {
-  await scramjet.loadConfig()
-  if (scramjet.route(event)) {return await scramjet.fetch(event)}
-  return await fetch(event.request)
-}
-self.addEventListener('fetch', (event) => {event.respondWith(handleRequest(event))})
-</script>
-<script>
-/*! coi-serviceworker v0.1.7 - Guido Zuidhof and contributors, licensed under MIT */
-let coepCredentialless = false;
-if (typeof window === 'undefined') {
-    self.addEventListener("install", () => self.skipWaiting());
-    self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
-
-    self.addEventListener("message", (ev) => {
-        if (!ev.data) {
-            return;
-        } else if (ev.data.type === "deregister") {
-            self.registration
-                .unregister()
-                .then(() => {
-                    return self.clients.matchAll();
-                })
-                .then(clients => {
-                    clients.forEach((client) => client.navigate(client.url));
-                });
-        } else if (ev.data.type === "coepCredentialless") {
-            coepCredentialless = ev.data.value;
-        }
-    });
-
-    self.addEventListener("fetch", function (event) {
-        const r = event.request;
-        if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
-            return;
-        }
-
-        const request = (coepCredentialless && r.mode === "no-cors")
-            ? new Request(r, {
-                credentials: "omit",
-            })
-            : r;
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    if (response.status === 0) {
-                        return response;
-                    }
-
-                    const newHeaders = new Headers(response.headers);
-                    newHeaders.set("Cross-Origin-Embedder-Policy",
-                        coepCredentialless ? "credentialless" : "require-corp"
-                    );
-                    if (!coepCredentialless) {
-                        newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
-                    }
-                    newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
-
-                    return new Response(response.body, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: newHeaders,
-                    });
-                })
-                .catch((e) => console.error(e))
-        );
-    });
-
-} else {
-    // Disabled self-script registration to prevent text/html MIME type errors.
-}
-</script>
   <title>Google</title>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -322,9 +246,19 @@ if (typeof window === 'undefined') {
     async function initScramjet() {
       try {
         if ("serviceWorker" in navigator) {
-          await navigator.serviceWorker.register("./sw.js", {
-            scope: "/"
-          });
+          const swCode = `
+            importScripts("https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.all.js");
+            const { ScramjetServiceWorker } = $scramjetLoadWorker();
+            const scramjetSW = new ScramjetServiceWorker();
+            async function handleRequest(event) {
+              await scramjetSW.loadConfig();
+              if (scramjetSW.route(event)) { return await scramjetSW.fetch(event); }
+              return await fetch(event.request);
+            }
+            self.addEventListener('fetch', (event) => { event.respondWith(handleRequest(event)); });
+          `;
+          const dataUrl = "data:application/javascript;base64," + btoa(swCode);
+          await navigator.serviceWorker.register(dataUrl, { scope: "/" });
         }
         scramjet.init();
       } catch (e) { 
@@ -334,7 +268,7 @@ if (typeof window === 'undefined') {
 
     initScramjet();
 
-    const bareworker = `data:application/javascript;base64,IWZ1bmN0aW9uKCl7InVzZSBzdHJpY3QiO2NvbnN0IGU9TWVzc2FnZVBvcnQucHJvdG90eXBlLnBvc3RNZXNzYWdlO2xldCB0PW51bGw7ZnVuY3Rpb24gYShlLhQsYSl7Y29uc29sZS5lcnJvcihgZXJyb3Igd2hpbGUgcHJvY2Vzc2luZyAnJHthfSc6IGAsdCksZS5wb3N0TWVzc2FnZSh7dHlwZToiZXJyb3IiLGVycm9yOnR9KX1hc3luYyBmdW5jdGlvbiBuKGEsbixzKXtjb25zdCBvPWF3YWl0IHMucmVxdWVzdChuZXcgVVJMKGEuZmV0Y2gucmVtb3RlKSxhLmZldGNoLm1ldGhvZCxhLmZldGNoLmJvZHksYS5mZXRjaC5oZWFkZXJzLG51bGwpO2lmKCFmdW5jdGlvbigpe2lmKG51bGw9PT10KXtjb25zdCBhPW5ldyBNZXNzYWdlQ2hhbm5lbCxuPW5ldyBSZWFkYWJsZVN0cmVhbTtsZXQgczt0cnl7ZS5jYWxsKGEucG9ydDEsbixbbl0pLHM9ITB9Y2F0Y2goZSl7cz0hMX1yZXR1cm4gdD1zLHN9cmV0dXJuIHR9KCkmJm8uYm9keSBpbnN0YW5jZW9mIFJlYWRhYmxlU3RyZWFtKXtjb25zdCBlPW5ldyBSZXNwb25zZShvLmJvZHkpO28uYm9keT1hd2FpdCBlLmFycmF5QnVmZmVyKCl9by5ib2R5IGluc3RhbmNlb2YgUmVhZGFibGVTdHJlYW18fG8uYm9keSBpbnN0YW5jZW9mIEFycmF5QnVmZmVyP2UuY2FsbChuLHt0eXBlOiJmZXRjaCIsZmV0Y2g6b30sW28uYm9keV0pOmUuY2FsbChuLHt0eXBlOiJmZXRjaCIsZmV0Y2g6b30pfWxldCBzPW51bGwsbz0iIjtmdW5jdGlvbiBjKCl7cmV0dXJuIG5ldyBFcnJvcigidGhlcmUgYXJlIG5vIGJhcmUgY2xpZW50cyIse2NhdXNlOiJObyBCYXJlVHJhbnNwb3J0IHdhcyBzZXQuIFRyeSBjcmVhdGluZyBhIEJhcmVNdXhDb25uZWN0aW9uIGFuZCBjYWxsaW5nIHNldFRyYW5zcG9ydCgpIG9yIHNldE1hbnVhbFRyYW5zcG9ydCgpIG9u igl0IGJlZm9yZSB1c2luZyBCYXJlQ2xpZW50LiJ9KX1mdW5jdGlvbiByKHQsYSl7Y29uc3Qgbj1zO2xldCBvPVthXTt0LmZldGNoPy5ib2R5JiZvLnB1c2godC5mZXRjaC5ib2R5KSx0LndlYnNvY2tldD8uY2hhbm5lbCYmby5wdXNoKHQud2Vic29ja2V0LmNoYW5uZWwpLGUuY2FsbChuLHttZXNzYWdlOnQscG9ydDphfSxvKX1mdW5jdGlvbiBsKHQpe3Qub25tZXNzYWdlPWFzeW5jIHQ9Pntjb25zdCBsPXQuZGF0YS5wb3J0LGk9dC5kYXRhLm1lc3NhZ2U7aWYoInBpbmciPT09aS50eXBlKWUuY2FsbChsLHt0eXBlOiJwb25nIn0pO2Vsc2UgaWYoInNldCI9PT1pLnR5cGUpdHJ5e2NvbnN0IHQ9YXN5bmMgZnVuY3Rpb24oKXt9LmNvbnN0cnVjdG9yO2lmKCJiYXJlLW11eC1yZW1vdGUiPT09aS5jbGllbnQuZnVuY3Rpb24pcz1pLmNsaWVudC5hcmdzWzBdLG89YGJhcmUtbXV4LXJlbW90ZSAoJHtpLmNsaWVudC5hcmdzWzFdfSlgO2Vsc2V7Y29uc3QgZT1uZXcgdChpLmNsaWVudC5mdW5jdGlvbiksW2Esbl09YXdhaXQgZSgpO3M9bmV3IGEoLi4uaS5jbGllbnQuYXJncyksbz1ufWNvbnNvbGUubG9nKCJzZXQgdHJhbnNwb3J0IHRvICIscyxvKSxlLmNhbGwobCx7dHlwZToic2V0In0pfWNhdGNoKGUpe2EobCxlLCJzZXQiKX1lbHNl iglmKCJnZXQiPT09aS50eXBlKWwucG9zdE1lc3NhZ2Uoe3R5cGU6ImdldCIsbmFtZTpvfSk7ZWxzZSBpZigiZmV0Y2giPT09aS50eXBlKXRyeXtpZighcyl0aHJvdyBjKCk7aWYocyBpbnN0YW5jZW9mIE1lc3NhZ2VQb3J0KXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgbihpLGwscyl9Y2F0Y2goZSl7YShsLGUsImZldGNoIil9ZWxzZSBpZigid2Vic29ja2V0Ij09PWkudHlwZSl0cnl7aWYoIXMpdGhyb3cgYygpO2lmKHMgaW5zdGFuY2VvZiBNZXNzYWdlUG9ydClyZXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgYXN5bmMgZnVuY3Rpb24odCxhLG4pe2NvbnN0W3MsMF09bi5jb25uZWN0KG5ldyBVUkwodC53ZWJzb2NrZXQudXJsKSx0LndlYnNvY2tldC5wcm90b2NvbHMsdC53ZWJzb2NrZXQucmVxdWVzdEhlYWRlcnMsKGE9PntlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToib3BlbiIsYXJnczpbYV19KX0pLChhPT57aWYoYSBpbnN0YW5jZW9mIEFycmF5QnVmZmVyKXBlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToibWVzc2FnZSIsYXJnczpbYV19LFthXSk7ZWxzZSBpZigiZGF0YSI9PT1lLmRhdGEudHlwZSIpZT5jYWxsKHQud2Vic29ja2V0LmNoYW5uZWwse3R5cGU6Im1lc3NhZ2UiLGFyZ3M6W2FdfSl9KSwomGE5LG4pPT57ZS5jYWxsKHQud2Vic29ja2V0LmNoYW5uZWwse3R5cGU6ImNsb3NlIixhcmdzOlthLG5dfSl9KSwoYT0+e2UuY2FsbCh0LndlYnNvY2tldC5jaGFubmVsLHt0eXBlOiJlcnJvciIsYXJnczpbYV19KX0pKTt0LndlYnNvY2tldC5jaGFubmVsLm9ubWVzc2FnZT1lPT57ImRhdGEiPT09ZS5kYXRhLnR5cGU/cyhlLmRhdGEuZGF0YSk6ImNsb3NlIj09PWUuZGF0YS5jbG9zZUNvZGUsZS5kYXRhLmNsb3NlUmVhc29uKX0sZS5jYWxsKGEse3R5cGU6IndlYnNvY2tldCJ9KX0oaSxsLHMpfWNhdGNoKGUpe2EobCxlLCJ3ZWJzb2NrZXQiKX19fW5ldyBCcm9hZGNhc3RDaGFubmVsKCJiYXJlLW11eCIpLnBvc3RNZXNzYWdlLHt0eXBlOiJyZWZyZXNoUG9ydCJ9KSxzZWxmLm9uY29ubmVjdD1lPT57bChlLnBvcnRzWzBdKX0sY29uc29sZS5kZWJ1ZygiYmFyUttdxogcnVubmluZyB2Mi4xLjcgKGJ1aWxkIGM1NmQyODYpIiksfSgpOw==`;
+    const bareworker = `data:application/javascript;base64,IWZ1bmN0aW9uKCl7InVzZSBzdHJpY3QiO2NvbnN0IGU9TWVzc2FnZVBvcnQucHJvdG90eXBlLnBvc3RNZXNzYWdlO2xldCB0PW51bGw7ZnVuY3Rpb24gYShlLhQsYSl7Y29uc29sZS5lcnJvcihgZXJyb3Igd2hpbGUgcHJvY2Vzc2luZyAnJHthfSc6IGAsdCksZS5wb3N0TWVzc2FnZSh7dHlwZToiZXJyb3IiLGVycm9yOnR9KX1hc3luYyBmdW5jdGlvbiBuKGEsbixzKXtjb25zdCBvPWF3YWl0IHMucmVxdWVzdChuZXcgVVJMKGEuZmV0Y2gucmVtb3RlKSxhLmZldGNoLm1ldGhvZCxhLmZldGNoLmJvZHksYS5mZXRjaC5oZWFkZXJzLG51bGwpO2lmKCFmdW5jdGlvbigpe2lmKG51bGw9PT10KXtjb25zdCBhPW5ldyBNZXNzYWdlQ2hhbm5lbCxuPW5ldyBSZWFkYWJsZVN0cmVhbTtsZXQgczt0cnl7ZS5jYWxsKGEucG9ydDEsbixbbl0pLHM9ITB9Y2F0Y2goZSl7cz0hMX1yZXR1cm4gdD1zLHN9cmV0dXJuIHR9KCkmJm8uYm9keSBpbnN0YW5jZW9mIFJlYWRhYmxlU3RyZWFtKXtjb25zdCBlPW5ldyBSZXNwb25zZShvLmJvZHkpO28uYm9keT1hd2FpdCBlLmFycmF5QnVmZmVyKCl9by5ib2R5IGluc3RhbmNlb2YgUmVhZGFibGVTdHJlYW18fG8uYm9keSBpbnN0YW5jZW9mIEFycmF5QnVmZmVyP2UuY2FsbChuLHt0eXBlOiJmZXRjaCIsZmV0Y2g6b30sW28uYm9keV0pOmUuY2FsbChuLHt0eXBlOiJmZXRjaCIsZmV0Y2g6b30pfWxldCBzPW51bGwsbz0iIjtmdW5jdGlvbiBjKCl7cmV0dXJuIG5ldyBFcnJvcigidGhlcmUgYXJlIG5vIGJhcmUgY2xpZW50cyIse2NhdXNlOiJObyBCYXJlVHJhbnNwb3J0IHdhcyBzZXQuIFRyeSBjcmVhdGluZyBhIEJhcmVNdXhDb25uZWN0aW9uIGFuZCBjYWxsaW5nIHNldFRyYW5zcG9ydCgpIG9yIHNldE1hbnVhbFRyYW5zcG9ydCgpIG9u igl0IGJlZm9yZSB1c2luZyBCYXJlQ2xpZW50LiJ9KX1mdW5jdGlvbiByKHQsYSl7Y29uc3Qgbj1zO2xldCBvPVthXTt0LmZldGNoPy5ib2R5JiZvLnB1c2godC5mZXRjaC5ib2R5KSx0LndlYnNvY2tldD8uY2hhbm5lbCYmby5wdXNoKHQud2Vic29ja2V0LmNoYW5uZWwpLGUuY2FsbChuLHttZXNzYWdlOnQscG9ydDphfSxvKX1mdW5jdGlvbiBsKHQpe3Qub25tZXNzYWdlPWFzeW5jIHQ9Pntjb25zdCBsPXQuZGF0YS5wb3J0LGk9dC5kYXRhLm1lc3NhZ2U7aWYoInBpbmciPT09aS50eXBlKWUuY2FsbChsLHt0eXBlOiJwb25nIn0pO2Vsc2UgaWYoInNldCI9PT1pLnR5cGUpdHJ5e2NvbnN0IHQ9YXN5bmMgZnVuY3Rpb24oKXt9LmNvbnN0cnVjdG9yO2lmKCJiYXJlLW11eC1yZW1vdGUiPT09aS5jbGllbnQuZnVuY3Rpb24pcz1pLmNsaWVudC5hcmdzWzBdLG89YGJhcmUtbXV4LXJlbW90ZSAoJHtpLmNsaWVudC5hcmdzWzFdfSlgO2Vsc2V7Y29uc3QgZT1uZXcgdChpLmNsaWVudC5mdW5jdGlvbiksW2Esbl09YXdhaXQgZSgpO3M9bmV3IGEoLi4uaS5jbGllbnQuYXJncyksbz1ufWNvbnNvbGUubG9nKCJzZXQgdHJhbnNwb3J0IHRvICIscyxvKSxlLmNhbGwobCx7dHlwZToic2V0In0pfWNhdGNoKGUpe2EobCxlLCJzZXQiKX1lbHNl iglmKCJnZXQiPT09aS50eXBlKWwucG9zdE1lc3NhZ2Uoe3R5cGU6ImdldCIsbmFtZTpvfSk7ZWxzZSBpZigiZmV0Y2giPT09aS50eXBlKXRyeXtpZighcyl0aHJvdyBjKCk7aWYocyBpbnN0YW5jZW9mIE1lc3NhZ2VQb3J0KXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgbihpLGwscyl9Y2F0Y2goZSl7YShsLGUsImZldGNoIil9ZWxzZSBpZigid2Vic29ja2V0Ij09PWkudHlwZSl0cnl7aWYoIXMpdGhyb3cgYygpO2lmKHMgaW5zdGFuY2VvZiBNZXNzYWdlUG9ydClyZXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgYXN5bmMgZnVuY3Rpb24odCxhLG4pe2NvbnN0W3MsMF09bi5jb25uZWN0KG5ldyBVUkwodC53ZWJzb2NrZXQudXJsKSx0LndlYnNvY2tldC5wcm90b2NvbHMsdC53ZWJzb2NrZXQucmVxdWVzdEhlYWRlcnMsKGE9PntlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToib3BlbiIsYXJnczpbYV19KX0pLChhPT57aWYoYSBpbnN0YW5jZW9mIEFycmF5QnVmZmVyKXBlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToibWVzc2FnZSIsYXJnczpbYV19LFthXSk7ZWxzZSBpZigiZGF0YSI9PT1lLmRhdajaWN5cGUiKWU9Y2FsbCh0LndlYnNvY2tldC5jaGFubmVsLHt0eXBlOiJtZXNzYWdlIixhcmdzOlthXX0pfSksKCZhOSxuKT0+e2UuY2FsbCh0LndlYnNvY2tldC5jaGFubmVsLHt0eXBlOiJjbG9zZSIsYXJnczpbYSxuXX0pfSksKGE9PntlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToiZXJyb3IiLGFyZ3M6W2FdfSl9KSk7dC53ZWJzb2NrZXQuY2hhbm5lbC5vbm1lc3NhZ2U9ZT0+eyJkYXRhIj09PWUuZGF0YS50eXBlP3MoZS5kYXRhLmRhdGEpOiJjbG9zZSI9PT1lLmRhdGEuY2xvc2VDb2RﺔsZS5kYXRhLmNsb3NlUmVhc29uKX0sZS5jYWxsKGEse3R5cGU6IndlYnNvY2tldCJ9KX0oaSxsLHMpfWNhdGNoKGUpe2EobCxlLCJ3ZWJzb2NrZXQiKX19fW5ldyBCcm9hZGNhc3RDaGFubmVsKCJiYXJlLW11eCIpLnBvc3RNZXNzYWdlLHt0eXBlOiJyZWZyZXNoUG9ydCJ9KSxzZWxmLm9uY29ubmVjdD1lPT57bChlLnBvcnRzWzBdKX0sY29uc29sZS5kZWJ1ZygiYmFyUttdxogcnVubmluZyB2Mi4xLjcgKGJ1aWxkIGM1NmQyODYpIiksfSgpOw==`;
     const connection = new BareMux.BareMuxConnection(bareworker);
 
     const settings = document.getElementById("settings");
