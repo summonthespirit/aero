@@ -1,4 +1,5 @@
 importScripts("https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.all.js");
+
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjetSW = new ScramjetServiceWorker();
 
@@ -7,7 +8,12 @@ self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim(
 
 async function handleRequest(event) {
   await scramjetSW.loadConfig();
-  if (scramjetSW.route(event)) { return await scramjetSW.fetch(event); }
+  if (scramjetSW.route(event)) { 
+    return await scramjetSW.fetch(event); 
+  }
   return await fetch(event.request);
 }
-self.addEventListener('fetch', (event) => { event.respondWith(handleRequest(event)); });
+
+self.addEventListener('fetch', (event) => { 
+  event.respondWith(handleRequest(event)); 
+});
