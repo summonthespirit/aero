@@ -184,7 +184,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
 </head>
 <body class="default">
-  <video class="background-video" id="background-video" autoplay muted playsinline preload="auto" aria-hidden="true" loop>
+  <video class="background-video" id="background-video" autoplay playsinline preload="auto" aria-hidden="true" loop>
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   
@@ -243,32 +243,16 @@
       } 
     });
 
-    async function initScramjet() {
-      try {
-        if ("serviceWorker" in navigator) {
-          const swCode = `
-            importScripts("https://cdn.jsdelivr.net/gh/summonthespirit/hosting@main/scramjet/scramjet.all.js");
-            const { ScramjetServiceWorker } = $scramjetLoadWorker();
-            const scramjetSW = new ScramjetServiceWorker();
-
-            self.addEventListener("install", () => self.skipWaiting());
-            self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
-
-            async function handleRequest(event) {
-              await scramjetSW.loadConfig();
-              if (scramjetSW.route(event)) { return await scramjetSW.fetch(event); }
-              return await fetch(event.request);
-            }
-            self.addEventListener('fetch', (event) => { event.respondWith(handleRequest(event)); });
-          `;
-          const dataUrl = "data:application/javascript;base64," + btoa(swCode);
-          await navigator.serviceWorker.register(dataUrl, { scope: "/" });
-        }
-        scramjet.init();
-      } catch (e) { 
-        console.error("scramjet failed to initialize;", e); 
-      }
+  async function initScramjet() {
+  try {
+    if ("serviceWorker" in navigator) {
+      await navigator.serviceWorker.register("https://cdn.jsdelivr.net/gh/summonthespirit/aero@main/sw.js", { scope: "/" });
     }
+    scramjet.init();
+  } catch (e) { 
+    console.error("scramjet failed to initialize;", e); 
+  }
+}
 
     initScramjet();
 
