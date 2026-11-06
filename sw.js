@@ -1,4 +1,4 @@
-importScripts("/scramjet/scramjet.all.js");
+importScripts("./scramjet/scramjet.all.js");
 
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjetSW = new ScramjetServiceWorker();
@@ -9,7 +9,7 @@ self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim(
 async function handleRequest(event) {
   const url = new URL(event.request.url);
 
-  if (url.pathname.startsWith("/scramjet/") || url.pathname.endsWith(".js") || url.pathname.endsWith(".wasm") || url.pathname === "/sw.js") {
+  if (url.pathname.includes("/scramjet/") || url.pathname.endsWith(".js") || url.pathname.endsWith(".wasm") || url.pathname === "/sw.js") {
     return await fetch(event.request);
   }
 
