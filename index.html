@@ -229,7 +229,7 @@
   </div>
   <iframe id="iframe"></iframe>
 
-  <script src="./scramjet/scramjet.all.js" defer></script>
+  <script src="scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
     import * as BareMux from "https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@latest/dist/index.mjs";
 
@@ -237,9 +237,9 @@
     const scramjet = new ScramjetController({ 
       prefix: "/scramjet/", 
       files: { 
-        wasm: "./scramjet/wasm.wasm", 
-        all: "./scramjet/scramjet.all.js", 
-        sync: "./scramjet/scramjet.sync.js" 
+        wasm: "wasm.wasm", 
+        all: "scramjet.all.js", 
+        sync: "scramjet.sync.js" 
       } 
     });
 
