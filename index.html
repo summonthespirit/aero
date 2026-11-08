@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Google</title>
-      <script src="baremux/baremux.js"></script>
+  <script src="baremux/baremux.js"></script>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
@@ -230,15 +231,15 @@
 
   <script src="scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
-    import * as BareMux from "/baremux/baremux.js";
+    import BareMux from "./baremux/baremux.js";
 
     const { ScramjetController } = $scramjetLoadController();
     const scramjet = new ScramjetController({ 
       prefix: "scramjet/", 
       files: { 
-        wasm: "wasm.wasm", 
-        all: "scramjet.all.js", 
-        sync: "scramjet.sync.js" 
+        wasm: "scramjet/wasm.wasm", 
+        all: "scramjet/scramjet.all.js", 
+        sync: "scramjet/scramjet.sync.js" 
       } 
     });
 
@@ -255,8 +256,7 @@
 
     initScramjet();
 
-    const bareworker = `data:application/javascript;base64,IWZ1bmN0aW9uKCl7InVzZSBzdHJpY3QiO2NvbnN0IGU9TWVzc2FnZVBvcnQucHJvdG90eXBlLnBvc3RNZXNzYWdlO2xldCB0PW51bGw7ZnVuY3Rpb24gYShlLhQsYSl7Y29uc29sZS5lcnJvcihgZXJyb3Igd2hpbGUgcHJvY2Vzc2luZyAnJHthfSc6IGAsdCksZS5wb3N0TWVzc2FnZSh7dHlwZToiZXJyb3IiLGVycm9yOnR9KX1hc3luYyBmdW5jdGlvbiBuKGEsbixzKXtjb25zdCBvPWF3YWl0IHMucmVxdWVzdChuZXcgVVJMKGEuZmV0Y2gucmVtb3RlKSxhLmZldGNoLm1ldGhvZCxhLmZldGNoLmJvZHksYS5mZXRjaC5oZWFkZXJzLG51bGwpO2lmKCFmdW5jdGlvbigpe2lmKG51bGw9PT10KXtjb25zdCBhPW5ldyBNZXNzYWdlQ2hhbm5lbCxuPW5ldyBSZWFkYWJsZVN0cmVhbTtsZXQgczt0cnl7ZS5jYWxsKGEucG9ydDEsbixbbl0pLHM9ITB9Y2F0Y2goZSl7cz0hMX1yZXR1cm4gdD1zLHN9cmV0dXJuIHR9KCkmJm8uYm9keSBpbnN0YW5jZW9mIFJlYWRhYmxlU3RyZWFtKXtjb25zdCBlPW5ldyBSZXNwb25zZShvLmJvZHkpO28uYm9keT1hd2FpdCBlLmFycmF5QnVmZmVyKCl9by5ib2R5 ins0YW5jZW9mIFJlYWRhYmxlU3RyZWFtfHxvLmJvZHkgaW5zdGFuY2VvZiBBcnJheUJ1ZmZlcj9lLmNhbGwoTCx7dHlwZToiZmV0Y2giLGZldGNoOm99LFtvLmJvZHldKTplLmNhbGwoTCx7dHlwZToiZmV0Y2giLGZldGNoOm99fWxldCBzPW51bGwsbz0iIjtmdW5jdGlvbiBjKCl7cmV0dXJuIG5ldyBFcnJvcigidGhlcmUgYXJlIG5vIGJhcmUgY2xpZW50cyIse2NhdXNlOiJObyBCYXJlVHJhbnNwb3J0IHdhcyBzZXQuIFRyeSBjcmVhdGluZyBhIEJhcmVNdXhDb25uZWN0aW9uIGFuZCBjYWxsaW5nIHNldFRyYW5zcG9ydCgpIG9yIHNldE1hbnVhbFRyYW5zcG9ydCgpIG9uIGl0IGJlZm9yZSB1c2luZyBCYXJlQ2xpZW50LiJ9KX1mdW5jdGlvbiByKHQsYSl7Y29uc3Qgbj1zO2xldCBvPVthXTt0LmZldGNoPy5ib2R5JiZvLnB1c2godC5mZXRjaC5ib2R5KSx0LndlYnNvY2tldD8uY2hhbm5lbCYmby5wdXNoKHQud2Vic29ja2V0LmNoYW5uZWwpLGUuY2FsbChuLHttZXNzYWdlOnQscG9ydDphfSxvKX1mdW5jdGlvbiBsKHQpe3Qub25tZXNzYWdlPWFzeW5jIHQ9Pntjb25zdCBsPXQuZGF0YS5wb3J0LGk9dC5kYXRhLm1lc3NhZ2U7aWYoInBpbmciPT09aS50eXBlKWUuY2FsbChsLHt0eXBlOiJwb25nIn0pO2Vsc2UgaWYoInNldCI9PT1pLnR5cGUpdHJ5e2NvbnN0IHQ9YXN5bmMgZnVuY3Rpb24oKXt9LmNvbnN0cnVjdG9yO2lmKCJiYXJlLW11eC1yZW1vdGUiPT09aS5jbGllbnQuZnVuY3Rpb24pcz1pLmNsaWVudC5hcmdzWzBdLG89YGJhcmUtbXV4LXJlbW90ZSAoJHtpLmNsaWVudC5hcmdzWzFdfSlgO2Vsc2V7Y29uc3QgZT1uZXcgdChpLmNsaWVudC5mdW5jdGlvbiksW2Esbl09YXdhaXQgZSgpO3M9bmV3IGEoLi4uaS5jbGllbnQuYXJncyksbz1ufWNvbnNvbGUubG9nKCJzZXQgdHJhbnNwb3J0IHRvICIscyxvKSxlLmNhbGwobCx7dHlwZToic2V0In0pfWNhdGNoKGUpe2EobCxlLCJzZXQiKX1lbHNlIGlmKCJnZXQiPT09aS50eXBlKWwucG9zdE1lc3NhZ2Uoe3R5cGU6ImdldCIsbmFtZTpvfSk7ZWxzZSBpZigiZmV0Y2giPT09aS50eXBlKXRyeXtpZighcyl0aHJvdyBjKCk7aWYocyBpbnN0YW5jZW9mIE1lc3NhZ2VQb3J0KXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgbihpLGwscyl9Y2F0Y2goZSl7YShsLGUsImZldGNoIil9ZWxzZSBpZigid2Vic29ja2V0Ij09PWkudHlwZSl0cnl7aWYoIXMpdGhyb3cgYygpO2lmKHMgaW5zdGFuY2VvZiBNZXNzYWdlUG9ydClyZXR1cm4gdm9pZCByKGksbCk7cy5yZWFkeXx8YXdhaXQgcy5pbml0KCksYXdhaXQgYXN5bmMgZnVuY3Rpb24odCxhLG4pe2NvbnN0W3MsMF09bi5jb25uZWN0KG5ldyBVUkwodC53ZWJzb2NrZXQudXJsKSx0LndlYnNvY2tldC5wcm90b2NvbHMsdC53ZWJzb2NrZXQucmVxdWVzdEhlYWRlcnMsKGE9PntlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToib3BlbiIsYXJnczpbYV19KX0pLChhPT57aWYoYSBpbnN0YW5jZW9mIEFycmF5QnVmZmVyKXBlLmNhbGwodC53ZWJzb2NrZXQuY2hhbm5lbCx7dHlwZToibWVzc2FnZSIsYXJnczpbYV19LFthXSk7ZWxzZSBpZigiZGF0YSI9PT1lLmRhdGEuZCIpZT5jYWxsKHQud2Vic29ja2V0LmNoYW5uZWwse3R5cGU6Im1lc3NhZ2UiLGFyZ3M6W2FdfSl9KSwoKWE5LG4pPT57ZS5jYWxsKHQud2Vic29ja2V0LmNoYW5uZWwse3R5cGU6ImNsb3NlIixhcmdzOlthLG5dfSl9KSwoYT0+e2UuY2FsbCh0LndlYnNvY2tldC5jaGFubmVsLHt0eXBlOiJlcnJvciIsYXJnczpbYV19KX0pKTt0LndlYnNvY2tldC5jaGFubmVsLm9ubWVzc2FnZT1lPT57ImRhdGEiPT09ZS5kYXRhLnR5cGU/cyhlLmRhdGEuZGF0YSk6ImNsb3NlIj09PWUuZGF0YS5jbG9zZUNvZGUsZS5kYXRhLm1lc3NhZ2U7fSxlLmNhbGwoYSx7dHlwZToid2Vic29ja2V0In0pfSZoaWNsKHksbCw4KX1jYXRjaC5lKXthKGwsZSwid2Vic29ja2V0Iil9fX1uZXwgQnJvYWRjYXN0Q2hhbm5lbCgiYmFyZS1tdXgipLnBvc3RNZXNzYWdlLHt0eXBlOiJyZWZyZXNoUG9ydCJ9KSxzZWxmLm9uY29ubmVjdD1lPT57bChlLnBvcnRzWzBdKX0sY29uc29sZS5kebugImJhcmUtbXV4OiBydW5uaW5nIHYyLjEuNyAoYnVpbGQgYzU2ZDI4NikiKX0oKTs=`;
-    const connection = new BareMux.BareMuxConnection(bareworker);
+    const connection = new BareMux.BareMuxConnection("./baremux/baremux-worker.js");
 
     const settings = document.getElementById("settings");
     const gear = document.getElementById("gear");
@@ -264,7 +264,7 @@
     const wispInput = document.getElementById("wispInput");
     const transports = document.querySelectorAll('input[name="transport"]');
     const searchEnginePicker = document.getElementById('searchEnginePicker');
-    const customSearchInput = document.getElementById('customSearch');
+    const customSearchInput = document.getElementById('customSearch') || { value: '' };
     const iframe = document.getElementById("iframe");
     const titleDiv = document.querySelector(".title");
     const searchForm = document.getElementById("search");
@@ -318,27 +318,18 @@
       } catch (err) {}
 
       const engine = (localStorage.getItem('selectedSearchEngine') || 'google');
-      let template;
-      if (engine === 'custom') {
-        template = (customSearchInput.value && customSearchInput.value.trim()) || localStorage.getItem('customSearchTemplate') || "";
-      } else {
-        template = searchTemplates[engine] || searchTemplates.brave;
-      }
-
-      if (!template) template = searchTemplates.brave;
+      let template = searchTemplates[engine] || searchTemplates.brave;
       return template.replace("%s", encodeURIComponent(input));
     }
 
     const currentWisp = localStorage.getItem('selectedWisp') || "wss://w.oneyplaysbestf.art/";
     const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
     const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || "brave";
-    const currentCustomTemplate = localStorage.getItem('customSearchTemplate') || "";
 
     document.getElementById("websocket").value = currentWisp;
-    document.querySelector(`input[value="${currentTransport}"]`).checked = true;
+    const radioCheck = document.querySelector(`input[value="${currentTransport}"]`);
+    if (radioCheck) radioCheck.checked = true;
     searchEnginePicker.value = currentSearchEngine;
-    customSearchInput.value = currentCustomTemplate;
-    customSearchInput.style.display = (currentSearchEngine === 'custom') ? 'block' : 'none';
 
     setTransport(currentTransport); 
         
@@ -359,20 +350,6 @@
     searchEnginePicker.addEventListener('change', (event) => {
       const engine = event.target.value;
       localStorage.setItem('selectedSearchEngine', engine);
-      if (engine === 'custom') {
-        customSearchInput.style.display = 'block';
-      } else {
-        customSearchInput.style.display = 'none';
-      }
-    });
-
-    customSearchInput.addEventListener('blur', (e) => {
-      const val = e.target.value.trim();
-      localStorage.setItem('customSearchTemplate', val);
-    });
-    customSearchInput.addEventListener('change', (e) => {
-      const val = e.target.value.trim();
-      localStorage.setItem('customSearchTemplate', val);
     });
     
     searchForm.addEventListener("submit", async (event) => {
