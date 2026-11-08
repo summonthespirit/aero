@@ -205,8 +205,8 @@
 
   <div id="overlay">
     <div id="settings">
-      <h3>Settings</h3>
-      <h4>Wisp Server</h4>
+      <h3>settings</h3>
+      <h4>wisp server</h4>
       <form id="wispInput">
         <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
@@ -231,7 +231,7 @@
 
   <script src="scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
-    import * as BareMux from "./baremux/baremux.js";
+    import { BareMuxConnection } from "./baremux/baremux.js";
 
     const { ScramjetController } = $scramjetLoadController();
     const scramjet = new ScramjetController({ 
@@ -256,7 +256,7 @@
 
     initScramjet();
 
-    const connection = new BareMux.BareMuxConnection("./baremux/baremux-worker.js");
+    const connection = new BareMuxConnection("./baremux/baremux-worker.js");
 
     const settings = document.getElementById("settings");
     const gear = document.getElementById("gear");
