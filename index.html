@@ -205,8 +205,8 @@
 
   <div id="overlay">
     <div id="settings">
-      <h3>settings</h3>
-      <h4>wisp server</h4>
+      <h3>Settings</h3>
+      <h4>Wisp Server</h4>
       <form id="wispInput">
         <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
@@ -254,7 +254,16 @@
 
     initScramjet();
 
-    const connection = new window.BareMux.BareMuxConnection("./baremux/baremux-worker.js");
+    let connection = null;
+    try {
+      if (window.BareMux && window.BareMux.BareMuxConnection) {
+        connection = new window.BareMux.BareMuxConnection("./baremux/baremux-worker.js");
+      } else if (window.BareMuxConnection) {
+        connection = new window.BareMuxConnection("./baremux/baremux-worker.js");
+      }
+    } catch (e) {
+      console.error("Failed to initialize BareMuxConnection:", e);
+    }
 
     const settings = document.getElementById("settings");
     const gear = document.getElementById("gear");
@@ -283,6 +292,7 @@
     }
 
     async function setTransport(transportsel) {
+      if (!connection) return;
       const wispUrl = getWispUrl();
       localStorage.setItem('selectedTransport', transportsel);
       switch (transportsel) {
