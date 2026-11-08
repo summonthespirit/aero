@@ -1,14 +1,15 @@
 <html>
 <head>
   <title>Google</title>
+      <script src="baremux/baremux.js"></script>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
     :root {
-        --xbox-bg-dark: #0f141c;
-        --xbox-surface: rgba(22, 29, 41, 0.85);
-        --xbox-border: #2a384d;
-        --xbox-glow: #0084ff;
+        --bg-dark: #0f141c;
+        --surface: rgba(22, 29, 41, 0.85);
+        --border: #2a384d;
+        --glow: #0084ff;
         --text-color: #ffffff;
         --text-muted: #8a9bb5;
     }
@@ -20,7 +21,7 @@
         font-family: "Sora", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         position: relative;
         overflow: hidden;
-        background-color: var(--xbox-bg-dark);
+        background-color: var(--bg-dark);
     }
 
     .background-video { 
@@ -47,9 +48,9 @@
     }
 
     input, button, select {
-        background: var(--xbox-surface);
+        background: var(--surface);
         color: var(--text-color);
-        border: 1px solid var(--xbox-border);
+        border: 1px solid var(--border);
         border-radius: 6px;
         padding: 8px 16px;
         user-select: none;
@@ -60,7 +61,7 @@
     }
 
     button:hover, input:focus {
-        border-color: var(--xbox-glow);
+        border-color: var(--glow);
         box-shadow: 0 0 12px rgba(0, 132, 255, 0.4);
         outline: none;
     }
@@ -144,8 +145,8 @@
         transform: translate(-50%, -50%);
         width: min(90vw, 440px);
         max-height: 80vh;
-        background: var(--xbox-surface);
-        border: 1.5px solid var(--xbox-border);
+        background: var(--surface);
+        border: 1.5px solid var(--border);
         border-radius: 12px;
         padding: 24px;
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
@@ -159,7 +160,7 @@
         letter-spacing: 1.5px;
         font-size: 1.1rem;
         color: #ffffff;
-        border-bottom: 1px solid var(--xbox-border);
+        border-bottom: 1px solid var(--border);
         padding-bottom: 12px;
     }
 
@@ -174,7 +175,7 @@
         width: 100vw;
         height: 100vh;
         border: none;
-        background: var(--xbox-bg-dark);
+        background: var(--bg-dark);
         z-index: 5;
         display: none;
     }
@@ -184,7 +185,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
 </head>
 <body class="default">
-  <video class="background-video" id="background-video" autoplay muted playsinline preload="auto" aria-hidden="true" loop>
+  <video class="background-video" id="background-video" autoplay playsinline preload="auto" aria-hidden="true" loop>
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   
@@ -207,31 +208,29 @@
       <h4>Wisp Server</h4>
       <form id="wispInput">
         <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
-        <button type="submit">Set Wisp</button>
+        <button type="submit">set wisp</button>
       </form>
-      <h4>Transport Protocol</h4>
+      <h4>transport</h4>
       <label>
-        <input type="radio" name="transport" value="epoxy" checked> Epoxy (default)
+        <input type="radio" name="transport" value="epoxy" checked> epoxy (default)
       </label><br>
       <label>
-        <input type="radio" name="transport" value="libcurl"> Libcurl
+        <input type="radio" name="transport" value="libcurl"> libcurl
       </label>
-      <h4>Search Engine</h4>
+      <h4>search engine</h4>
       <select id="searchEnginePicker" style="width:100%;">
-        <option value="google">Google</option>
-        <option value="bing">Bing</option>
-        <option value="duckduckgo">DuckDuckGo</option>
-        <option value="brave">Brave</option>
-        <option value="custom">Custom</option>
+        <option value="google">google</option>
+        <option value="bing">bing</option>
+        <option value="duckduckgo">duckduckgo</option>
+        <option value="brave">brave</option>
       </select>
-      <input id="customSearch" type="text" placeholder="https://search.example.com/search?q=%s" style="display:none; width:100%; margin-top:8px;" />
     </div>
   </div>
   <iframe id="iframe"></iframe>
 
   <script src="scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
-    import * as BareMux from "https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux@latest/dist/index.mjs";
+    import * as BareMux from "/baremux/baremux.js";
 
     const { ScramjetController } = $scramjetLoadController();
     const scramjet = new ScramjetController({ 
@@ -290,13 +289,13 @@
       localStorage.setItem('selectedTransport', transportsel);
       switch (transportsel) {
         case "epoxy":
-          await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-transport/dist/index.mjs", [{ wisp: wispUrl }]);
+          await connection.setTransport("./transport/epoxy.mjs", [{ wisp: wispUrl }]);
           break;
         case "libcurl":
-          await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/libcurl-transport/dist/index.mjs", [{ websocket: wispUrl }]);
+          await connection.setTransport("./transport/libcurl.mjs", [{ websocket: wispUrl }]);
           break;
         default:
-          await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-transport/dist/index.mjs", [{ wisp: wispUrl }]);
+          await connection.setTransport("./transport/epoxy.mjs", [{ wisp: wispUrl }]);
           break;
       }
     }
@@ -305,8 +304,7 @@
       google: "https://www.google.com/search?q=%s",
       bing: "https://www.bing.com/search?q=%s",
       duckduckgo: "https://duckduckgo.com/?q=%s",
-      brave: "https://search.brave.com/search?q=%s",
-      ecosia: "https://www.ecosia.org/search?method=index&ar=1&q=%s"
+      brave: "https://search.brave.com/search?q=%s"
     };
 
     function search(input) {
