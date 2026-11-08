@@ -186,7 +186,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
 </head>
 <body class="default">
-  <video class="background-video" id="background-video" autoplay disablePictureInPicture playsinline preload="auto" aria-hidden="true" loop>
+  <video class="background-video" id="background-video" autoplay playsinline preload="auto" aria-hidden="true" loop>
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   
@@ -231,8 +231,6 @@
 
   <script src="scramjet/scramjet.all.js" defer></script>
   <script type="module" defer>
-    import { BareMuxConnection } from "./baremux/baremux.js";
-
     const { ScramjetController } = $scramjetLoadController();
     const scramjet = new ScramjetController({ 
       prefix: "scramjet/", 
@@ -256,7 +254,7 @@
 
     initScramjet();
 
-    const connection = new BareMuxConnection("./baremux/baremux-worker.js");
+    const connection = new window.BareMux.BareMuxConnection("./baremux/baremux-worker.js");
 
     const settings = document.getElementById("settings");
     const gear = document.getElementById("gear");
@@ -349,7 +347,6 @@
 
     searchEnginePicker.addEventListener('change', (event) => {
       const engine = event.target.value;
-      localStorage.setItem('selected_search_engine', engine); // sync key if needed
       localStorage.setItem('selectedSearchEngine', engine);
     });
     
