@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Google</title>
-  <script src="baremux/baremux.js"></script>
+  <script src="baremux.js"></script>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
@@ -59,6 +59,7 @@
         letter-spacing: 0.5px;
         backdrop-filter: blur(8px);
         transition: all 0.2s ease;
+        width: 200px;
     }
 
     button:hover, input:focus {
@@ -205,8 +206,8 @@
 
   <div id="overlay">
     <div id="settings">
-      <h3>Settings</h3>
-      <h4>Wisp Server</h4>
+      <h3>settings</h3>
+      <h4>wisp server</h4>
       <form id="wispInput">
         <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
@@ -237,7 +238,7 @@
       try {
         const { ScramjetController } = window.$scramjetLoadController();
         scramjet = new ScramjetController({ 
-          prefix: "scramjet/", 
+          prefix: "", 
           files: { 
             wasm: "wasm.wasm", 
             all: "scramjet.all.js", 
@@ -256,9 +257,9 @@
       let connection = null;
       try {
         if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("./baremux/baremux-worker.js");
+          connection = new window.BareMux.BareMuxConnection("baremux-worker.js");
         } else if (window.BareMuxConnection) {
-          connection = new window.BareMuxConnection("./baremux/baremux-worker.js");
+          connection = new window.BareMuxConnection("baremux-worker.js");
         }
       } catch (e) {
         console.error("failed to initialize baremux:", e);
