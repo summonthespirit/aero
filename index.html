@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Google</title>
+  <script src="./baremux/baremux.js"></script>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
@@ -14,6 +17,8 @@
         --text-muted: #8a9bb5;
     }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
         margin: 0;
         padding: 0;
@@ -22,6 +27,7 @@
         position: relative;
         overflow: hidden;
         background-color: var(--bg-dark);
+        height: 100vh;
     }
 
     .background-video { 
@@ -58,7 +64,6 @@
         letter-spacing: 0.5px;
         backdrop-filter: blur(8px);
         transition: all 0.2s ease;
-        width: 200px;
     }
 
     button:hover, input:focus {
@@ -121,6 +126,17 @@
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
+    #status {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      z-index: 10;
+      letter-spacing: 0.03em;
+    }
+
     #overlay {
         position: fixed;
         inset: 0;
@@ -168,18 +184,30 @@
     #gear {
         cursor: pointer;
         font-size: 20px;
-        z-index: 9;
     }
 
-    #iframe {
+    #browser {
         position: fixed;
         inset: 0;
         width: 100vw;
         height: 100vh;
         border: none;
         background: var(--bg-dark);
-        z-index: 10;
+        z-index: 5;
         display: none;
+    }
+    #browser.visible { display: block; }
+
+    #load-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      width: 0%;
+      background: #7ec8ff;
+      box-shadow: 0 0 6px rgba(126,200,255,0.6);
+      z-index: 25;
+      opacity: 0;
+      border-radius: 0 2px 2px 0;
     }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,7 +215,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
 </head>
 <body class="default">
-  <video class="background-video" id="background-video" autoplay disablePictureInPicture playsinline preload="auto" aria-hidden="true" loop>
+  <video class="background-video" id="background-video" autoplay playsinline preload="auto" aria-hidden="true" loop>
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   
@@ -201,8 +229,10 @@
   </div>
 
   <form id="search">
-    <input id="url" type="text" class="search-input search" placeholder="Search the web or enter a URL" autocomplete="off">
+    <input id="url" type="text" class="search-input search" placeholder="Search the web or enter a URL" autocomplete="off" autocorrect="off" spellcheck="false">
   </form>
+
+  <p id="status">loading…</p>
 
   <div id="overlay">
     <div id="settings">
@@ -214,10 +244,10 @@
       </form>
       <h4>transport</h4>
       <label>
-        <input type="radio" name="transport" value="epoxy" checked> epoxy (default)
+        <input type="radio" name="transport" value="libcurl" checked> libcurl (default)
       </label><br>
       <label>
-        <input type="radio" name="transport" value="libcurl"> libcurl
+        <input type="radio" name="transport" value="epoxy"> epoxy
       </label>
       <h4>search engine</h4>
       <select id="searchEnginePicker" style="width:100%;">
@@ -228,96 +258,122 @@
       </select>
     </div>
   </div>
-  <iframe id="iframe"></iframe>
 
-  <script src="scramjet/scramjet.all.js"></script>
-  <script src="scramjet/scramjet.sync.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', async () => {
-      let scramjet;
-      let connection;
+  <iframe id="browser" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads" allow="autoplay; fullscreen"></iframe>
+  <div id="load-bar"></div>
+
+  <script type="module">
+    const status = document.getElementById('status');
+    const bgVideo = document.getElementById("background-video");
+
+    bgVideo.play().catch(() => {
+      window.addEventListener('click', () => { bgVideo.play(); }, { once: true });
+    });
+
+    const settings = document.getElementById("settings");
+    const gear = document.getElementById("gear");
+    const overlay = document.getElementById("overlay"); 
+    const wispInputForm = document.getElementById("wispInput");
+    const wispInputBox = document.getElementById("websocket");
+    const transports = document.querySelectorAll('input[name="transport"]');
+    const searchEnginePicker = document.getElementById('searchEnginePicker');
+    const iframe = document.getElementById("browser");
+    const titleDiv = document.querySelector(".title");
+    const searchForm = document.getElementById("search");
+    const urlInput = document.getElementById("url");
+    const loadBar = document.getElementById("load-bar");
+
+    gear.onclick = () => { overlay.classList.toggle("active"); settings.classList.toggle("open"); }
+    overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove("active"); settings.classList.remove("open"); } }
+    document.onkeydown = e => { if (e.key === "Escape") { overlay.classList.remove("active"); settings.classList.remove("open"); } }
+
+    function startLoadBar() {
+      loadBar.style.transition = 'none';
+      loadBar.style.width = '0%';
+      loadBar.style.opacity = '1';
+      void loadBar.offsetWidth;
+      loadBar.style.transition = 'width 0.3s ease';
+      loadBar.style.width = '85%';
+    }
+
+    function finishLoadBar() {
+      loadBar.style.width = '100%';
+      setTimeout(() => {
+        loadBar.style.opacity = '0';
+        setTimeout(() => { loadBar.style.width = '0%'; }, 300);
+      }, 200);
+    }
+
+    const BASE = new URL('./', document.baseURI).pathname;
+    let DEFAULT_WISP = 'wss://w.oneyplaysbestf.art/';
+    let DEFAULT_TRANSPORT = 'libcurl';
+    let currentConn = null;
+    let currentTransport = DEFAULT_TRANSPORT;
+
+    function transportPath(method) {
+      return BASE + 'transport/' + method + '.mjs';
+    }
+
+    function getSavedTransport() {
       try {
-       if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("/baremux/baremux.js");
-        } else if (window.BareMuxConnection) {
-          connection = new window.BareMuxConnection("/baremux/baremux-worker.js", { worker: true });
-        }
-
-        const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
-        const currentWisp = localStorage.getItem('selectedWisp') || "wss://w.oneyplaysbestf.art/";
-
-        async function applyTransport(transportType, wispUrl) {
-          if (!connection) return;
-          const transportFile = transportType === "libcurl" ? "/transport/libcurl.mjs" : "/transport/epoxy.mjs";
-          const transportArg = transportType === "libcurl" ? { websocket: wispUrl } : { wisp: wispUrl };
-          
-          for (let i = 0; i < 5; i++) {
-            try {
-              await connection.setTransport(transportFile, [transportArg]);
-              console.log("baremux transport set successfully:", transportType);
-              return;
-            } catch (err) {
-              console.warn(`transport set attempt ${i + 1} failed, retrying...`, err);
-              await new Promise(r => setTimeout(r, 600));
-            }
-          }
-        }
-
-        await applyTransport(currentTransport, currentWisp);
-
-        const { ScramjetController } = window.$scramjetLoadController();
-        scramjet = new ScramjetController({ 
-          prefix: "/scramjet/", 
-          files: { 
-            wasm: "scramjet/wasm.wasm", 
-            all: "scramjet/scramjet.all.js", 
-            sync: "scramjet/scramjet.sync.js" 
-          } 
-        });
-
-        if ("serviceWorker" in navigator) {
-          await navigator.serviceWorker.register("sw.js", { scope: "/" });
-        }
-        scramjet.init();
-      } catch (e) { 
-        console.error("scramjet initialization failed:", e); 
+        const saved = localStorage.getItem('fish-transport');
+        return (saved === 'epoxy' || saved === 'libcurl') ? saved : DEFAULT_TRANSPORT;
+      } catch (e) {
+        return DEFAULT_TRANSPORT;
       }
+    }
 
-      const settings = document.getElementById("settings");
-      const gear = document.getElementById("gear");
-      const overlay = document.getElementById("overlay"); 
-      const wispInput = document.getElementById("wispInput");
-      const transports = document.querySelectorAll('input[name="transport"]');
-      const searchEnginePicker = document.getElementById('searchEnginePicker');
-      const iframe = document.getElementById("iframe");
-      const titleDiv = document.querySelector(".title");
-      const searchForm = document.getElementById("search");
-      const urlInput = document.getElementById("url");
-      const bgVideo = document.getElementById("background-video");
+    function getSavedWisp() {
+      try {
+        return localStorage.getItem('fish-wisp') || DEFAULT_WISP;
+      } catch (e) {
+        return DEFAULT_WISP;
+      }
+    }
 
-      bgVideo.play().catch(() => {
-        window.addEventListener('click', () => { bgVideo.play(); }, { once: true });
+    try {
+      status.textContent = 'Loading engine…';
+      await import('./scramjet/scramjet.bundle.js');
+
+      status.textContent = 'starting controller…';
+      const { ScramjetController } = $scramjetLoadController();
+      const PREFIX = BASE + 'scramjet/';
+      const sj = new ScramjetController({
+        prefix: PREFIX,
+        files: {
+          wasm: BASE + 'scramjet/wasm.wasm',
+          all:  BASE + 'scramjet/scramjet.all.js',
+          sync: BASE + 'scramjet/scramjet.sync.js',
+        },
       });
 
-      gear.onclick = () => { overlay.classList.toggle("active"); settings.classList.toggle("open"); }
-      overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove("active"); settings.classList.remove("open"); } }
-      document.onkeydown = e => { if (e.key === "Escape") { overlay.classList.remove("active"); settings.classList.remove("open"); } }
+      status.textContent = 'registering service worker…';
+      await navigator.serviceWorker.register(BASE + 'sw.js', { scope: BASE });
+      await navigator.serviceWorker.ready;
+      await sj.init();
 
-      function getWispUrl() {
-        const wisp = document.getElementById("websocket").value.trim();
-        const defaultWisp = "wss://w.oneyplaysbestf.art/";
-        return wisp || defaultWisp;
-      }
+      status.textContent = 'connecting transport…';
+      const conn = new _0zzl94._ak44v7(BASE + 'baremux/baremux-worker.js');
+      currentTransport = getSavedTransport();
+      const WISP = getSavedWisp();
 
-      async function setTransport(transportsel) {
-        const wispUrl = getWispUrl();
-        localStorage.setItem('selectedTransport', transportsel);
-        const transportFile = transportsel === "libcurl" ? "./transport/libcurl.mjs" : "./transport/epoxy.mjs";
-        const transportArg = transportsel === "libcurl" ? { websocket: wispUrl } : { wisp: wispUrl };
-        if (connection) {
-          await connection.setTransport(transportFile, [transportArg]);
-        }
+      try {
+        await conn.setTransport(transportPath(currentTransport), [{ wisp: WISP }]);
+      } catch (err) {
+        currentTransport = 'libcurl';
+        localStorage.setItem('fish-transport', 'libcurl');
+        await conn.setTransport(transportPath('libcurl'), [{ wisp: WISP }]);
       }
+      currentConn = conn;
+
+      wispInputBox.value = WISP;
+      const radioCheck = document.querySelector(`input[name="transport"][value="${currentTransport}"]`);
+      if (radioCheck) radioCheck.checked = true;
+      const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || 'google';
+      searchEnginePicker.value = currentSearchEngine;
+
+      status.textContent = 'Ready';
+      setTimeout(() => { status.style.display = 'none'; }, 1000);
 
       const searchTemplates = {
         google: "https://www.google.com/search?q=%s",
@@ -338,47 +394,49 @@
         } catch (err) {}
 
         const engine = (localStorage.getItem('selectedSearchEngine') || 'google');
-        let template = searchTemplates[engine] || searchTemplates.brave;
+        let template = searchTemplates[engine] || searchTemplates.google;
         return template.replace("%s", encodeURIComponent(input));
       }
 
-      const currentWisp = localStorage.getItem('selectedWisp') || "wss://w.oneyplaysbestf.art/";
-      const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
-      const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || "brave";
-
-      document.getElementById("websocket").value = currentWisp;
-      const radioCheck = document.querySelector(`input[value="${currentTransport}"]`);
-      if (radioCheck) radioCheck.checked = true;
-      searchEnginePicker.value = currentSearchEngine;
-          
-      wispInput.addEventListener("submit", async (event) => {
+      wispInputForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const newWisp = document.getElementById("websocket").value.trim();
-        localStorage.setItem('selectedWisp', newWisp);
-        const currentTransportRadio = document.querySelector('input[name="transport"]:checked');
-        if (currentTransportRadio) {
-          await setTransport(currentTransportRadio.value);
+        const newWisp = wispInputBox.value.trim();
+        if (!newWisp) return;
+        localStorage.setItem('fish-wisp', newWisp);
+        if (currentConn) {
+          await currentConn.setTransport(transportPath(currentTransport), [{ wisp: newWisp }]);
         }
       });
 
       transports.forEach(radio => {
         radio.addEventListener('change', async (event) => {
-          await setTransport(event.target.value);
+          currentTransport = event.target.value;
+          localStorage.setItem('fish-transport', currentTransport);
+          if (currentConn) {
+            const wispUrl = wispInputBox.value.trim() || WISP;
+            await currentConn.setTransport(transportPath(currentTransport), [{ wisp: wispUrl }]);
+          }
         });
       });
 
       searchEnginePicker.addEventListener('change', (event) => {
-        const engine = event.target.value;
-        localStorage.setItem('selectedSearchEngine', engine);
+        localStorage.setItem('selectedSearchEngine', event.target.value);
       });
-      
+
+      iframe.addEventListener('load', () => {
+        finishLoadBar();
+      });
+
       searchForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const query = urlInput.value.trim();
         if (!query) return;
 
+        bgVideo.pause();
+        bgVideo.muted = true;
+
         let fixedurl = search(query);
-        let src = scramjet.encodeUrl(fixedurl);
+        let src = sj.encodeUrl(fixedurl);
         
         titleDiv.style.display = "none";
         searchForm.style.position = "fixed";
@@ -386,10 +444,16 @@
         searchForm.style.left = "2rem";
         searchForm.style.transform = "none";
         
-        iframe.style.display = "block";
+        startLoadBar();
+        iframe.classList.add("visible");
         iframe.src = src;
       });
-    });
+
+    } catch (err) {
+      status.style.color = '#f87171';
+      status.textContent = 'error: ' + err.message;
+      console.error('init error:', err);
+    }
   </script>
 </body>
 </html>
