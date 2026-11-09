@@ -230,7 +230,7 @@
     <input id="url" type="text" class="search-input search" placeholder="Search the web or enter a URL" autocomplete="off" autocorrect="off" spellcheck="false">
   </form>
 
-  <p id="status" style="display: none;">Ready</p>
+  <p id="status" style="display: none;">ready</p>
 
   <div id="overlay" class="">
     <div id="settings" class="">
@@ -239,7 +239,7 @@
       <h4>wisp server</h4>
     <br>
       <form id="wispInput">
-        <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
+        <input id="websocket" type="text" placeholder="wss://anura.pro/wisp/" value="wss://anura.pro/wisp/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
       </form>
     <br>
@@ -308,8 +308,8 @@
     }
 
     const BASE = new URL('./', document.baseURI).pathname;
-    let DEFAULT_WISP = 'wss://w.oneyplaysbestf.art/';
-    let DEFAULT_TRANSPORT = 'libcurl';
+    let DEFAULT_WISP = 'wss://anura.pro/wisp/';
+    let DEFAULT_TRANSPORT = 'epoxy';
     let currentConn = null;
     let currentTransport = DEFAULT_TRANSPORT;
 
@@ -375,7 +375,7 @@
       const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || 'brave';
       searchEnginePicker.value = currentSearchEngine;
 
-      status.textContent = 'Ready';
+      status.textContent = 'ready';
       setTimeout(() => { status.style.display = 'none'; }, 1000);
 
       const searchTemplates = {
