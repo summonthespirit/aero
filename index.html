@@ -238,7 +238,7 @@
       let connection;
       try {
        if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("/baremux/baremux-worker.js", { worker: true });
+          connection = new window.BareMux.BareMuxConnection("/baremux/baremux.js");
         } else if (window.BareMuxConnection) {
           connection = new window.BareMuxConnection("/baremux/baremux-worker.js", { worker: true });
         }
