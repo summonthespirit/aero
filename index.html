@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Google</title>
   <script src="ads.js"></script>
+  <script src="load.js"></script>
   <link rel="icon" href="https://google.com/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
@@ -125,26 +126,24 @@
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
-     #loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483647;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-dark, #0f141c);
-    opacity: 1;
-    transition: opacity 0.5s ease;
-  }
-  #loading-screen.hide {
-    opacity: 0;
-    pointer-events: none;
-  }
-  #loading-screen img {
-    max-width: min(400px, 70vw);
-    max-height: 70vh;
-    object-fit: contain;
-  }
+  #loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: #0f141c;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+#loading-screen.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+#loading-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
     #status {
       position: fixed;
@@ -238,7 +237,7 @@
   <div id="loading-screen">
   <img src="/img/loading.png">
 </div>
-  <video class="background-video" id="background-video" autoplay="true" playsinline="true" preload="auto" aria-hidden="true" loop="">
+  <video class="background-video" id="background-video" autoplay="true" muted playsinline="true" preload="auto" aria-hidden="true" loop="">
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   

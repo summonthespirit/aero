@@ -223,11 +223,3 @@ try {
   status.textContent = 'error: ' + err.message;
   console.error('init error:', err);
 }
-
-setTimeout(() => {
-    const el = document.getElementById('loading-screen');
-    bgVideo.muted()
-    el.classList.add('hide');
-    setTimeout(() => el.remove(), 500);
-  }, 3000);
-  bgVideo.unmuted()
