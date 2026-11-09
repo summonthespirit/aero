@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Google</title>
@@ -193,10 +191,9 @@
         height: 100vh;
         border: none;
         background: var(--bg-dark);
-        z-index: 100000000;
+        z-index: 10000000;
         display: none;
     }
-    
     #browser.visible { display: block; }
 
     #load-bar {
@@ -204,53 +201,25 @@
       top: 0; left: 0;
       height: 3px;
       width: 0%;
-      background: #7ec8ff;
+      background: #ffffff;
       box-shadow: 0 0 6px rgba(126,200,255,0.6);
       z-index: 25;
       opacity: 0;
       border-radius: 0 2px 2px 0;
     }
-    
-.btn {
-    position: fixed;
-    top: 15px;
-    right: 2rem;
-    z-index: 20;
-    display: none;
-    cursor: pointer;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-color);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-    transition: all 0.2s ease;
-}
-
-.btn.visible {
-  display: flex;
-}
-
-.btn:hover {
-  border-color: var(--glow);
-  box-shadow: 0 0 12px rgba(0, 132, 255, 0.4);
-}
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&amp;display=swap" rel="stylesheet">
 </head>
 <body class="default">
-  <video class="background-video" id="background-video" autoplay playsinline preload="auto" aria-hidden="true" loop>
+  <video class="background-video" id="background-video" autoplay="" playsinline="" preload="auto" aria-hidden="true" loop="">
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
   
   <header>
     <div></div>
-    <span id="gear"><i class="fa">&#xf013;</i></span>
+    <span id="gear"><i class="fa"></i></span>
   </header>
 
   <div class="title">
@@ -261,34 +230,38 @@
     <input id="url" type="text" class="search-input search" placeholder="Search the web or enter a URL" autocomplete="off" autocorrect="off" spellcheck="false">
   </form>
 
-  <p id="status">loading…</p>
+  <p id="status" style="display: none;">Ready</p>
 
-  <div id="overlay">
-    <div id="settings">
+  <div id="overlay" class="">
+    <div id="settings" class="">
       <h3>settings</h3>
+        <br>
       <h4>wisp server</h4>
+    <br>
       <form id="wispInput">
         <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
       </form>
+    <br>
       <h4>transport</h4>
+    <br>
       <label>
-        <input type="radio" name="transport" value="libcurl" checked> libcurl (default)
+        <input type="radio" name="transport" value="libcurl" checked=""> libcurl (default)
       </label><br>
       <label>
         <input type="radio" name="transport" value="epoxy"> epoxy
       </label>
+    <br>
       <h4>search engine</h4>
       <select id="searchEnginePicker" style="width:100%;">
         <option value="google">google</option>
         <option value="bing">bing</option>
-        <option value="brave">brave (auto)</option>
+        <option value="duckduckgo">duckduckgo</option>
+        <option value="brave">brave</option>
       </select>
     </div>
   </div>
-  <button id="reload" class="btn" title="reload">
-  <i class="fa fa-refresh"></i>
-</button>
+
   <iframe id="browser" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads" allow="autoplay; fullscreen"></iframe>
   <div id="load-bar"></div>
 
@@ -402,7 +375,7 @@
       const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || 'brave';
       searchEnginePicker.value = currentSearchEngine;
 
-      status.textContent = 'ready';
+      status.textContent = 'Ready';
       setTimeout(() => { status.style.display = 'none'; }, 1000);
 
       const searchTemplates = {
@@ -423,7 +396,7 @@
         } catch (err) {}
 
         const engine = (localStorage.getItem('selectedSearchEngine') || 'brave');
-        let template = searchTemplates[engine] || searchTemplates.google;
+        let template = searchTemplates[engine] || searchTemplates.brave;
         return template.replace("%s", encodeURIComponent(input));
       }
 
@@ -484,5 +457,5 @@
       console.error('init error:', err);
     }
   </script>
-</body>
-</html>
+
+</body></html>
