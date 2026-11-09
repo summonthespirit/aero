@@ -238,9 +238,9 @@
       let connection;
       try {
        if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("baremux/baremux-worker.js", { worker: true });
+          connection = new window.BareMux.BareMuxConnection("/baremux/baremux-worker.js", { worker: true });
         } else if (window.BareMuxConnection) {
-          connection = new window.BareMuxConnection("baremux/baremux-worker.js", { worker: true });
+          connection = new window.BareMuxConnection("/baremux/baremux-worker.js", { worker: true });
         }
 
         const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
@@ -248,7 +248,7 @@
 
         async function applyTransport(transportType, wispUrl) {
           if (!connection) return;
-          const transportFile = transportType === "libcurl" ? "./transport/libcurl.mjs" : "./transport/epoxy.mjs";
+          const transportFile = transportType === "libcurl" ? "/transport/libcurl.mjs" : "/transport/epoxy.mjs";
           const transportArg = transportType === "libcurl" ? { websocket: wispUrl } : { wisp: wispUrl };
           
           for (let i = 0; i < 5; i++) {
@@ -276,7 +276,7 @@
         });
 
         if ("serviceWorker" in navigator) {
-          await navigator.serviceWorker.register("./sw.js", { scope: "/" });
+          await navigator.serviceWorker.register("sw.js", { scope: "/" });
         }
         scramjet.init();
       } catch (e) { 
