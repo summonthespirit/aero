@@ -1,16 +1,23 @@
-importScripts("/scramjet/scramjet.all.js");
+importScripts('scramjet/scramjet.all.js')
 
-const scramjet = new ScramjetServiceWorker({
-  prefix: "/scramjet/",
-  files: {
-    wasm: "/scramjet/wasm.wasm",
-    all: "/scramjet/scramjet.all.js",
-    sync: "/scramjet/scramjet.sync.js"
-  }
-});
+const { ScramjetServiceWorker } = $scramjetLoadWorker()
+const scramjet = new ScramjetServiceWorker()
 
-self.addEventListener("fetch", (event) => {
-  if (scramjet.route(event)) {
-    event.respondWith(scramjet.fetch(event));
-  }
-});
+self.addEventListener('install', () => {
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim())
+})
+
+async function handleRequest(event) {
+  await scramjet.loadConfig()
+  if (!scramjet.route(event)) return fetch(event.request)
+  return scramjet.fetch(event)
+}
+
+self.addEventListener('fetch', (event) => {
+  if (new URL(event.request.url).origin !== self.location.origin) return
+  event.respondWith(handleRequest(event))
+})

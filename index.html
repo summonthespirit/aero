@@ -246,10 +246,10 @@
       <h4>transport</h4>
     <br>
       <label>
-        <input type="radio" name="transport" value="libcurl"> libcurl
+        <input type="radio" name="transport" value="libcurl" checked=""> libcurl (default)
       </label><br>
       <label>
-        <input type="radio" name="transport" value="epoxy" checked=""> epoxy (default)
+        <input type="radio" name="transport" value="epoxy"> epoxy
       </label>
     <br>
       <h4>search engine</h4>
@@ -363,9 +363,9 @@
       try {
         await conn.setTransport(transportPath(currentTransport), [{ wisp: WISP }]);
       } catch (err) {
-        currentTransport = 'epoxy';
-        localStorage.setItem('fish-transport', 'epoxy');
-        await conn.setTransport(transportPath('epoxy'), [{ wisp: WISP }]);
+        currentTransport = 'libcurl';
+        localStorage.setItem('fish-transport', 'libcurl');
+        await conn.setTransport(transportPath('libcurl'), [{ wisp: WISP }]);
       }
       currentConn = conn;
 
