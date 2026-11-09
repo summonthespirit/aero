@@ -1,7 +1,3 @@
-// Scramjet 2.x alpha client boot. Replaces the inline <script type="module"> in index.html.
-// Verified against: scramjet 2.0.67-alpha.2 + scramjet-controller 0.0.14 + scramjet-utils 0.0.3
-// Transports: libcurl-transport ^2, epoxy-transport ^3 (proxy-transports generation, NOT bare-mux)
-
 const status = document.getElementById('status');
 const bgVideo = document.getElementById('background-video');
 
@@ -43,9 +39,9 @@ function finishLoadBar() {
   }, 200);
 }
 
-const BASE = new URL('./', document.baseURI).pathname;
+const BASE = new URL('./', document.baseURI).pathname;   
 const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art';
-const DEFAULT_TRANSPORT = 'libcurl';
+const DEFAULT_TRANSPORT = 'epoxy';
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch { return null; } },
@@ -62,7 +58,7 @@ const loadScript = src => new Promise((resolve, reject) => {
   const s = document.createElement('script');
   s.src = src;
   s.onload = resolve;
-  s.onerror = () => reject(new Error('Failed to load ' + src));
+  s.onerror = () => reject(new Error('failed to load ' + src));
   document.head.append(s);
 });
 
@@ -137,7 +133,6 @@ try {
   }, 15000);
 
   const plugins = [];
-  if (utils?.HttpCachePlugin) plugins.push(new utils.HttpCachePlugin());
   if (utils?.UrlWatcherPlugin) plugins.push(new utils.UrlWatcherPlugin(() => finishLoadBar()));
   const frame = controller.createFrame(iframe, { plugins });
 

@@ -242,8 +242,7 @@
   </video>
   
   <header>
-    <div></div>
-    <span id="gear"><i class="fa"></i></span>
+   <span id="gear"><i class="fa-solid fa-gear"></i></span>
   </header>
 
   <div class="title">
@@ -251,10 +250,10 @@
   </div>
 
   <form id="search">
-    <input id="url" type="text" class="search-input search" placeholder="Search the web or enter a URL" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input id="url" type="text" class="search-input search" placeholder="search the web or enter a url." autocomplete="off" autocorrect="off" spellcheck="false">
   </form>
 
-  <p id="status" style="display: none;">ready</p>
+  <p id="status"></p>
 
   <div id="overlay" class="">
     <div id="settings" class="">
@@ -263,17 +262,17 @@
       <h4>wisp server</h4>
     <br>
       <form id="wispInput">
-        <input id="websocket" type="text" placeholder="wss://anura.pro/wisp/" value="wss://anura.pro/wisp/" style="width:100%; margin-bottom:8px;">
+        <input id="websocket" type="text" placeholder="wss://w.oneyplaysbestf.art/" value="wss://w.oneyplaysbestf.art/" style="width:100%; margin-bottom:8px;">
         <button type="submit">set wisp</button>
       </form>
     <br>
       <h4>transport</h4>
     <br>
       <label>
-        <input type="radio" name="transport" value="libcurl" checked=""> libcurl (default)
+        <input type="radio" name="transport" value="libcurl"> libcurl
       </label><br>
       <label>
-        <input type="radio" name="transport" value="epoxy"> epoxy
+        <input type="radio" name="transport" value="epoxy" checked=""> epoxy (default)
       </label>
     <br>
       <h4>search engine</h4>
@@ -291,4 +290,5 @@
 
   <script src="app.js" type="module"></script>
 
-</body></html>
+</body>
+</html>
