@@ -84,7 +84,7 @@ try {
   const serviceworker = navigator.serviceWorker.controller ?? registration.active;
 
   status.textContent = 'loading engine…';
-  for (const src of ['scram/scramjet.js', 'controller/controller.api.js', 'utils/scramjet-utils.js']) {
+  for (const src of ['scram/scramjet.js', 'controller/controller.api.js', 'utils/scramjet-utils.mjs']) {
     await loadScript(BASE + src);
   }
   const api = window.$scramjetController;
