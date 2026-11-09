@@ -1,6 +1,8 @@
 # aero
 aero is a proxy website i update in my free time.
 
+![preview of site](readme/preview.png)
+
 # features
 static!!!! you can rehost this website **everywhere**!!!!
 
