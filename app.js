@@ -82,7 +82,7 @@ try {
     );
   }
   const serviceworker = navigator.serviceWorker.controller ?? registration.active;
-  if (!serviceworker) throw new Error('sw didnt work.' err);
+  if (!serviceworker) throw new Error('sw didnt work.');
 
   status.textContent = 'loading engine…';
   for (const src of ['scram/scramjet.js', 'controller/controller.api.js', 'utils/scramjet-utils.js']) {
