@@ -234,7 +234,8 @@
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
       let scramjet;
-            try {
+      let connection;
+      try {
         if (window.BareMux && window.BareMux.BareMuxConnection) {
           connection = new window.BareMux.BareMuxConnection("baremux/baremux-worker.js");
         } else if (window.BareMuxConnection) {
@@ -269,17 +270,6 @@
         console.error("Initialization failed:", e); 
       }
 
-      let connection = null;
-      try {
-        if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("baremux-worker.js");
-        } else if (window.BareMuxConnection) {
-          connection = new window.BareMuxConnection("baremux-worker.js");
-        }
-      } catch (e) {
-        console.error("failed to initialize baremux:", e);
-      }
-
       const settings = document.getElementById("settings");
       const gear = document.getElementById("gear");
       const overlay = document.getElementById("overlay"); 
@@ -289,6 +279,7 @@
       const iframe = document.getElementById("iframe");
       const titleDiv = document.querySelector(".title");
       const searchForm = document.getElementById("search");
+      const urlInput = document.getElementById("url");
       const bgVideo = document.getElementById("background-video");
 
       bgVideo.play().catch(() => {
@@ -330,6 +321,7 @@
       };
 
       function search(input) {
+        if (!input) return "";
         try {
           return new URL(input).toString();
         } catch (err) {}
@@ -378,7 +370,10 @@
       
       searchForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        let fixedurl = search(document.getElementById("url").value);
+        const query = urlInput.value.trim();
+        if (!query) return;
+
+        let fixedurl = search(query);
         let src = scramjet.encodeUrl(fixedurl);
         
         titleDiv.style.display = "none";
