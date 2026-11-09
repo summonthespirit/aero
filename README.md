@@ -2,9 +2,12 @@
 aero is a proxy website i update in my free time.
 
 ![preview of site](readme/preview.png)
+*preview of the website*
 
 # features
 static!!!! you can rehost this website **everywhere**!!!!
+
+roblox xbox ui!
 
 i dont know what else to write!!!!
 
