@@ -1,3 +1,7 @@
+// Scramjet 2.x alpha client boot. Replaces the inline <script type="module"> in index.html.
+// Verified against: scramjet 2.0.67-alpha.2 + scramjet-controller 0.0.14 + scramjet-utils 0.0.3
+// Transports: libcurl-transport ^2, epoxy-transport ^3 (proxy-transports generation, NOT bare-mux)
+
 const status = document.getElementById('status');
 const bgVideo = document.getElementById('background-video');
 
@@ -39,8 +43,8 @@ function finishLoadBar() {
   }, 200);
 }
 
-const BASE = new URL('./', document.baseURI).pathname; 
-const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art/';
+const BASE = new URL('./', document.baseURI).pathname;
+const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art';
 const DEFAULT_TRANSPORT = 'libcurl';
 
 const store = {
@@ -58,7 +62,7 @@ const loadScript = src => new Promise((resolve, reject) => {
   const s = document.createElement('script');
   s.src = src;
   s.onload = resolve;
-  s.onerror = () => reject(new Error('failed to load ' + src));
+  s.onerror = () => reject(new Error('Failed to load ' + src));
   document.head.append(s);
 });
 
@@ -82,13 +86,25 @@ try {
     );
   }
   const serviceworker = navigator.serviceWorker.controller ?? registration.active;
+  if (!serviceworker) throw new Error('the service worker did not become active.');
 
   status.textContent = 'loading engine…';
-  for (const src of ['scram/scramjet.js', 'controller/controller.api.js', 'utils/scramjet-utils.mjs']) {
+  for (const src of ['scram/scramjet.js', 'controller/controller.api.js']) {
     await loadScript(BASE + src);
   }
   const api = window.$scramjetController;
-  const utils = window.$scramjetUtils ?? window.$scramjetController?.utils;
+
+  let utils = null;
+  for (const name of ['scramjet-utils.mjs', 'scramjet-utils.js']) {
+    try {
+      const mod = await import(BASE + 'utils/' + name);
+      utils = { ...(mod.default ?? {}), ...mod };
+      break;
+    } catch (err) {
+      console.warn('utils import failed for', name, err);
+    }
+  }
+  if (!utils) console.warn('scramjet-utils not loaded: plugins disabled');
 
   status.textContent = 'connecting transport…';
   let currentTransport = getSavedTransport();
@@ -207,3 +223,11 @@ try {
   status.textContent = 'error: ' + err.message;
   console.error('init error:', err);
 }
+
+setTimeout(() => {
+    const el = document.getElementById('loading-screen');
+    bgVideo.muted()
+    el.classList.add('hide');
+    setTimeout(() => el.remove(), 500);
+  }, 3000);
+  bgVideo.unmuted()

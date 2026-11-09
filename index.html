@@ -125,6 +125,27 @@
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
+     #loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-dark, #0f141c);
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+  #loading-screen.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #loading-screen img {
+    max-width: min(400px, 70vw);
+    max-height: 70vh;
+    object-fit: contain;
+  }
+
     #status {
       position: fixed;
       bottom: 2rem;
@@ -214,6 +235,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&amp;display=swap" rel="stylesheet">
 </head>
 <body class="default">
+  <div id="loading-screen">
+  <img src="/img/loading.png">
+</div>
   <video class="background-video" id="background-video" autoplay="true" playsinline="true" preload="auto" aria-hidden="true" loop="">
     <source src="https://cdn.jsdelivr.net/gh/summonthespirit/hosting-2@main/Roblox's%20Old%20Xbox%20One%20UI%20Background%20Animation%20(HQ)%20(4K).mp4" type="video/mp4">
   </video>
