@@ -193,9 +193,10 @@
         height: 100vh;
         border: none;
         background: var(--bg-dark);
-        z-index: 5;
+        z-index: 100000000;
         display: none;
     }
+    
     #browser.visible { display: block; }
 
     #load-bar {
@@ -209,6 +210,34 @@
       opacity: 0;
       border-radius: 0 2px 2px 0;
     }
+    
+.btn {
+    position: fixed;
+    top: 15px;
+    right: 2rem;
+    z-index: 20;
+    display: none;
+    cursor: pointer;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+}
+
+.btn.visible {
+  display: flex;
+}
+
+.btn:hover {
+  border-color: var(--glow);
+  box-shadow: 0 0 12px rgba(0, 132, 255, 0.4);
+}
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -253,12 +282,13 @@
       <select id="searchEnginePicker" style="width:100%;">
         <option value="google">google</option>
         <option value="bing">bing</option>
-        <option value="duckduckgo">duckduckgo</option>
-        <option value="brave">brave</option>
+        <option value="brave">brave (auto)</option>
       </select>
     </div>
   </div>
-
+  <button id="reload" class="btn" title="reload">
+  <i class="fa fa-refresh"></i>
+</button>
   <iframe id="browser" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads" allow="autoplay; fullscreen"></iframe>
   <div id="load-bar"></div>
 
@@ -332,7 +362,7 @@
     }
 
     try {
-      status.textContent = 'Loading engine…';
+      status.textContent = 'loading engine…';
       await import('./scramjet/scramjet.bundle.js');
 
       status.textContent = 'starting controller…';
@@ -369,16 +399,15 @@
       wispInputBox.value = WISP;
       const radioCheck = document.querySelector(`input[name="transport"][value="${currentTransport}"]`);
       if (radioCheck) radioCheck.checked = true;
-      const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || 'google';
+      const currentSearchEngine = localStorage.getItem('selectedSearchEngine') || 'brave';
       searchEnginePicker.value = currentSearchEngine;
 
-      status.textContent = 'Ready';
+      status.textContent = 'ready';
       setTimeout(() => { status.style.display = 'none'; }, 1000);
 
       const searchTemplates = {
         google: "https://www.google.com/search?q=%s",
         bing: "https://www.bing.com/search?q=%s",
-        duckduckgo: "https://duckduckgo.com/?q=%s",
         brave: "https://search.brave.com/search?q=%s"
       };
 
@@ -393,7 +422,7 @@
           if (url.hostname.includes(".")) return url.toString();
         } catch (err) {}
 
-        const engine = (localStorage.getItem('selectedSearchEngine') || 'google');
+        const engine = (localStorage.getItem('selectedSearchEngine') || 'brave');
         let template = searchTemplates[engine] || searchTemplates.google;
         return template.replace("%s", encodeURIComponent(input));
       }
