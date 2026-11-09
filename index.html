@@ -168,6 +168,7 @@
     #gear {
         cursor: pointer;
         font-size: 20px;
+        z-index: 9;
     }
 
     #iframe {
@@ -177,7 +178,7 @@
         height: 100vh;
         border: none;
         background: var(--bg-dark);
-        z-index: 5;
+        z-index: 10;
         display: none;
     }
   </style>
@@ -244,13 +245,25 @@
 
         const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
         const currentWisp = localStorage.getItem('selectedWisp') || "wss://w.oneyplaysbestf.art/";
-        if (connection) {
-          if (currentTransport === "libcurl") {
-            await connection.setTransport("./transport/libcurl.mjs", [{ websocket: currentWisp }]);
-          } else {
-            await connection.setTransport("./transport/epoxy.mjs", [{ wisp: currentWisp }]);
+
+        async function applyTransport(transportType, wispUrl) {
+          if (!connection) return;
+          const transportFile = transportType === "libcurl" ? "./transport/libcurl.mjs" : "./transport/epoxy.mjs";
+          const transportArg = transportType === "libcurl" ? { websocket: wispUrl } : { wisp: wispUrl };
+          
+          for (let i = 0; i < 5; i++) {
+            try {
+              await connection.setTransport(transportFile, [transportArg]);
+              console.log("baremux transport set successfully:", transportType);
+              return;
+            } catch (err) {
+              console.warn(`transport set attempt ${i + 1} failed, retrying...`, err);
+              await new Promise(r => setTimeout(r, 600));
+            }
           }
         }
+
+        await applyTransport(currentTransport, currentWisp);
 
         const { ScramjetController } = window.$scramjetLoadController();
         scramjet = new ScramjetController({ 
@@ -267,7 +280,7 @@
         }
         scramjet.init();
       } catch (e) { 
-        console.error("Initialization failed:", e); 
+        console.error("scramjet initialization failed:", e); 
       }
 
       const settings = document.getElementById("settings");
@@ -297,19 +310,12 @@
       }
 
       async function setTransport(transportsel) {
-        if (!connection) return;
         const wispUrl = getWispUrl();
         localStorage.setItem('selectedTransport', transportsel);
-        switch (transportsel) {
-          case "epoxy":
-            await connection.setTransport("./transport/epoxy.mjs", [{ wisp: wispUrl }]);
-            break;
-          case "libcurl":
-            await connection.setTransport("./transport/libcurl.mjs", [{ websocket: wispUrl }]);
-            break;
-          default:
-            await connection.setTransport("./transport/epoxy.mjs", [{ wisp: wispUrl }]);
-            break;
+        const transportFile = transportsel === "libcurl" ? "./transport/libcurl.mjs" : "./transport/epoxy.mjs";
+        const transportArg = transportsel === "libcurl" ? { websocket: wispUrl } : { wisp: wispUrl };
+        if (connection) {
+          await connection.setTransport(transportFile, [transportArg]);
         }
       }
 
@@ -344,8 +350,6 @@
       const radioCheck = document.querySelector(`input[value="${currentTransport}"]`);
       if (radioCheck) radioCheck.checked = true;
       searchEnginePicker.value = currentSearchEngine;
-
-      setTransport(currentTransport); 
           
       wispInput.addEventListener("submit", async (event) => {
         event.preventDefault();
