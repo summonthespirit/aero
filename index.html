@@ -234,8 +234,24 @@
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
       let scramjet;
-      try {
-       const { ScramjetController } = window.$scramjetLoadController();
+            try {
+        if (window.BareMux && window.BareMux.BareMuxConnection) {
+          connection = new window.BareMux.BareMuxConnection("baremux/baremux-worker.js");
+        } else if (window.BareMuxConnection) {
+          connection = new window.BareMuxConnection("baremux/baremux-worker.js");
+        }
+
+        const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
+        const currentWisp = localStorage.getItem('selectedWisp') || "wss://w.oneyplaysbestf.art/";
+        if (connection) {
+          if (currentTransport === "libcurl") {
+            await connection.setTransport("./transport/libcurl.mjs", [{ websocket: currentWisp }]);
+          } else {
+            await connection.setTransport("./transport/epoxy.mjs", [{ wisp: currentWisp }]);
+          }
+        }
+
+        const { ScramjetController } = window.$scramjetLoadController();
         scramjet = new ScramjetController({ 
           prefix: "/scramjet/", 
           files: { 
@@ -246,11 +262,11 @@
         });
 
         if ("serviceWorker" in navigator) {
-          await navigator.serviceWorker.register("sw.js", { scope: "/" });
+          await navigator.serviceWorker.register("./sw.js", { scope: "/" });
         }
         scramjet.init();
       } catch (e) { 
-        console.error("scramjet failed to initialize;", e); 
+        console.error("Initialization failed:", e); 
       }
 
       let connection = null;
