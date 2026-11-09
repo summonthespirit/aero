@@ -237,10 +237,10 @@
       let scramjet;
       let connection;
       try {
-        if (window.BareMux && window.BareMux.BareMuxConnection) {
-          connection = new window.BareMux.BareMuxConnection("baremux/baremux-worker.js");
+       if (window.BareMux && window.BareMux.BareMuxConnection) {
+          connection = new window.BareMux.BareMuxConnection("baremux/baremux-worker.js", { worker: true });
         } else if (window.BareMuxConnection) {
-          connection = new window.BareMuxConnection("baremux/baremux-worker.js");
+          connection = new window.BareMuxConnection("baremux/baremux-worker.js", { worker: true });
         }
 
         const currentTransport = localStorage.getItem('selectedTransport') || "epoxy";
