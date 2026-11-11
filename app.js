@@ -1,4 +1,4 @@
-import { chooseWisp, testWisp, normalizeWisp } from './wisp-check.js';
+import { chooseWisp } from './wisp-check.js';
 
 const status = document.getElementById('status');
 const bgVideo = document.getElementById('background-video');
@@ -10,8 +10,6 @@ bgVideo.play().catch(() => {
 const settings = document.getElementById('settings');
 const gear = document.getElementById('gear');
 const overlay = document.getElementById('overlay');
-const wispInputForm = document.getElementById('wispInput');
-const wispInputBox = document.getElementById('websocket');
 const transports = document.querySelectorAll('input[name="transport"]');
 const searchEnginePicker = document.getElementById('searchEnginePicker');
 const iframe = document.getElementById('browser');
@@ -38,7 +36,6 @@ searchForm.addEventListener('submit', event => {
     status.textContent = 'starting up… your search will open when ready';
   }
 });
-wispInputForm.addEventListener('submit', event => event.preventDefault());
 
 function startLoadBar() {
   loadBar.style.transition = 'none';
@@ -87,7 +84,7 @@ const loadScript = src => new Promise((resolve, reject) => {
   const s = document.createElement('script');
   s.src = src;
   s.onload = resolve;
-  s.onerror = () => reject(new Error('Failed to load ' + src));
+  s.onerror = () => reject(new Error('failed to load ' + src));
   document.head.append(s);
 });
 
@@ -140,6 +137,7 @@ try {
   });
   let WISP = picked.url;
   if (picked.manual) store.set('fish-wisp', WISP);
+  let transport;
   try {
     transport = await makeTransport(currentTransport, WISP);
   } catch (err) {
@@ -170,7 +168,6 @@ try {
   if (utils?.UrlWatcherPlugin) plugins.push(new utils.UrlWatcherPlugin(() => finishLoadBar()));
   const frame = controller.createFrame(iframe, { plugins });
 
-  wispInputBox.value = WISP;
   const radioCheck = document.querySelector(`input[name="transport"][value="${currentTransport}"]`);
   if (radioCheck) radioCheck.checked = true;
   searchEnginePicker.value = store.get('selectedSearchEngine') || 'brave';
@@ -202,33 +199,10 @@ try {
     await controller.setTransport(next);
   }
 
-  function flashStatus(text, color) {
-    status.style.display = '';
-    status.style.color = color || '';
-    status.textContent = text;
-    setTimeout(() => { status.style.display = 'none'; status.style.color = ''; }, 4000);
-  }
-
-  wispInputForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    const newWisp = normalizeWisp(wispInputBox.value);
-    if (!newWisp) return flashStatus('enter a valid wisp address', '#f87171');
-    flashStatus('testing wisp server…');
-    if (!(await testWisp(newWisp))) {
-      return flashStatus("couldn't reach that wisp server (blocked or offline)", '#f87171');
-    }
-    WISP = newWisp;
-    wispInputBox.value = newWisp;
-    store.set('fish-wisp', newWisp);
-    await applyTransport();
-    flashStatus('wisp server updated');
-  });
-
   transports.forEach(radio => {
     radio.addEventListener('change', async event => {
       currentTransport = event.target.value;
       store.set('fish-transport', currentTransport);
-      WISP = wispInputBox.value.trim() || WISP;
       await applyTransport();
     });
   });
