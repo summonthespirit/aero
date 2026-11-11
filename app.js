@@ -22,6 +22,22 @@ gear.onclick = () => { overlay.classList.toggle('active'); settings.classList.to
 overlay.onclick = e => { if (e.target === overlay) { overlay.classList.remove('active'); settings.classList.remove('open'); } };
 document.onkeydown = e => { if (e.key === 'Escape') { overlay.classList.remove('active'); settings.classList.remove('open'); } };
 
+let pendingQuery = null;
+let handleSearch = null;
+searchForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const q = urlInput.value.trim();
+  if (!q) return;
+  if (handleSearch) {
+    handleSearch(q);
+  } else {
+    pendingQuery = q;
+    status.style.display = '';
+    status.textContent = 'loading… your search will open when ready';
+  }
+});
+wispInputForm.addEventListener('submit', event => event.preventDefault());
+
 function startLoadBar() {
   loadBar.style.transition = 'none';
   loadBar.style.width = '0%';
@@ -39,8 +55,8 @@ function finishLoadBar() {
   }, 200);
 }
 
-const BASE = new URL('./', document.baseURI).pathname;   
-const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art';
+const BASE = new URL('./', document.baseURI).pathname;
+const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art/';
 const DEFAULT_TRANSPORT = 'epoxy';
 
 const store = {
@@ -62,7 +78,7 @@ const loadScript = src => new Promise((resolve, reject) => {
   document.head.append(s);
 });
 
-async function makeTransport(method, wisp) {
+  async function makeTransport(method, wisp) {
   const mod = await import(BASE + method + '/index.mjs');
   const Client = mod.default;
   return new Client({ wisp });
@@ -192,11 +208,7 @@ try {
 
   iframe.addEventListener('load', finishLoadBar);
 
-  searchForm.addEventListener('submit', event => {
-    event.preventDefault();
-    const query = urlInput.value.trim();
-    if (!query) return;
-
+  handleSearch = query => {
     bgVideo.pause();
     bgVideo.muted = true;
 
@@ -211,7 +223,13 @@ try {
     startLoadBar();
     iframe.classList.add('visible');
     frame.go(target);
-  });
+  };
+
+  if (pendingQuery) {
+    const q = pendingQuery;
+    pendingQuery = null;
+    handleSearch(q);
+  }
 } catch (err) {
   status.style.display = '';
   status.style.color = '#f87171';
