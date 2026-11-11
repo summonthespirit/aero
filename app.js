@@ -1,3 +1,5 @@
+import { chooseWisp, testWisp, normalizeWisp } from './wisp-check.js';
+
 const status = document.getElementById('status');
 const bgVideo = document.getElementById('background-video');
 
@@ -33,7 +35,7 @@ searchForm.addEventListener('submit', event => {
   } else {
     pendingQuery = q;
     status.style.display = '';
-    status.textContent = 'loading… your search will open when ready';
+    status.textContent = 'starting up… your search will open when ready';
   }
 });
 wispInputForm.addEventListener('submit', event => event.preventDefault());
@@ -56,7 +58,18 @@ function finishLoadBar() {
 }
 
 const BASE = new URL('./', document.baseURI).pathname;
-const DEFAULT_WISP = 'wss://w.oneyplaysbestf.art/';
+const WISP_SERVERS = [
+  'wss://w.oneyplaysbestf.art/',
+  'wss://wisp.mercurywork.shop/wisp/',
+  'wss://wisp.mercurywork.shop/',
+  'wss://wisp-85822.wasmer.app/',
+  'wss://arctic.lat/wisp/',
+  'wss://anura.pro/',
+  'wss://arctic.lat/_q/',
+  'wss://wisp.freewisp.org/',
+  'wss://gointospace.app/wisp/'
+];
+const DEFAULT_WISP = WISP_SERVERS[0];
 const DEFAULT_TRANSPORT = 'epoxy';
 
 const store = {
@@ -74,11 +87,11 @@ const loadScript = src => new Promise((resolve, reject) => {
   const s = document.createElement('script');
   s.src = src;
   s.onload = resolve;
-  s.onerror = () => reject(new Error('failed to load ' + src));
+  s.onerror = () => reject(new Error('Failed to load ' + src));
   document.head.append(s);
 });
 
-  async function makeTransport(method, wisp) {
+async function makeTransport(method, wisp) {
   const mod = await import(BASE + method + '/index.mjs');
   const Client = mod.default;
   return new Client({ wisp });
@@ -98,7 +111,7 @@ try {
     );
   }
   const serviceworker = navigator.serviceWorker.controller ?? registration.active;
-  if (!serviceworker) throw new Error('the service worker did not become active.');
+  if (!serviceworker) throw new Error('The service worker did not become active');
 
   status.textContent = 'loading engine…';
   for (const src of ['scram/scramjet.js', 'controller/controller.api.js']) {
@@ -120,8 +133,13 @@ try {
 
   status.textContent = 'connecting transport…';
   let currentTransport = getSavedTransport();
-  let WISP = getSavedWisp();
-  let transport;
+  status.textContent = 'checking wisp servers…';
+  const picked = await chooseWisp({
+    servers: [store.get('fish-wisp'), ...WISP_SERVERS],
+    onStatus: t => { status.style.display = ''; status.textContent = t; },
+  });
+  let WISP = picked.url;
+  if (picked.manual) store.set('fish-wisp', WISP);
   try {
     transport = await makeTransport(currentTransport, WISP);
   } catch (err) {
@@ -184,13 +202,26 @@ try {
     await controller.setTransport(next);
   }
 
+  function flashStatus(text, color) {
+    status.style.display = '';
+    status.style.color = color || '';
+    status.textContent = text;
+    setTimeout(() => { status.style.display = 'none'; status.style.color = ''; }, 4000);
+  }
+
   wispInputForm.addEventListener('submit', async event => {
     event.preventDefault();
-    const newWisp = wispInputBox.value.trim();
-    if (!newWisp) return;
+    const newWisp = normalizeWisp(wispInputBox.value);
+    if (!newWisp) return flashStatus('enter a valid wisp address', '#f87171');
+    flashStatus('testing wisp server…');
+    if (!(await testWisp(newWisp))) {
+      return flashStatus("couldn't reach that wisp server (blocked or offline)", '#f87171');
+    }
     WISP = newWisp;
+    wispInputBox.value = newWisp;
     store.set('fish-wisp', newWisp);
     await applyTransport();
+    flashStatus('wisp server updated');
   });
 
   transports.forEach(radio => {
