@@ -64,7 +64,8 @@ const WISP_SERVERS = [
   'wss://anura.pro/',
   'wss://arctic.lat/_q/',
   'wss://wisp.freewisp.org/',
-  'wss://gointospace.app/wisp/'
+  'wss://gointospace.app/wisp/',
+  'wss://edu.robert.rest/'
 ];
 const DEFAULT_WISP = WISP_SERVERS[0];
 const DEFAULT_TRANSPORT = 'epoxy';
